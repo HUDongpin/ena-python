@@ -148,19 +148,25 @@ Golden fixtures are generated from **real, compiled rENA 0.3.1** and stamped wit
 | Mean rotation | Partly — `MR1`/`SVD2` only |
 | Cohen's d, `ena_correlations` | **No** |
 
-### Known divergence: two-formula regression rotation
-
-Given both `x_var` and `y_var`, `rotate_by_regression` returns a **different y axis than rENA** — deliberately.
-
-rENA means to regress y on the x-deflated points (`ena.rotate.by.regression.R` sets `V <- defA` first), but that assignment never takes effect: its `with.ena.matrix` helper rebinds `V` to the raw points unless passed a `V =` argument, and a refactor dropped it. rENA therefore regresses y on undeflated points and returns axes that are strongly collinear (cosine ~0.8–0.97 on our fixtures), making its "2D" projection nearly one-dimensional. Its sibling `ena.rotate.by.generalized` deflates correctly on the same data.
-
-pyENA deflates, so its axes are orthogonal. The x axis matches rENA exactly. If rENA fixes this, pyENA will match it column-for-column.
-
-pyENA also names regression axes after the predictor (`score_reg`) where rENA names them after the first edge (`A & B_reg`) — an rENA naming bug from the same string/formula confusion. Names are cosmetic; the vectors match.
-
-This and four other rENA 0.3.1 issues found while porting are written up, with reproducible snippets, in **[`docs/rena-upstream-issues.md`](docs/rena-upstream-issues.md)**.
-
 See [`docs/testing_strategy.md`](docs/testing_strategy.md) and [`reference/README.md`](reference/README.md).
+
+## Issues found in rENA 0.3.1
+
+Porting turned up five places where rENA 0.3.1 behaves differently from what its own code, comments, or docs intend. They are written up with reproducible snippets in **[`docs/rena-upstream-issues.md`](docs/rena-upstream-issues.md)**, and tracked here under the [`upstream-rena`](https://github.com/HUDongpin/pyENA/issues?q=label%3Aupstream-rena) label.
+
+| # | Issue | Severity | pyENA |
+|---|---|---|---|
+| [1](docs/rena-upstream-issues.md#1-enarotatebyhenaregression-does-not-deflate-the-y-axis) | `ena.rotate.by.hena.regression` does not deflate the y axis, returning axes ~0.8–0.97 collinear | **High** — affects coordinates | Deflates; axes orthogonal |
+| [2](docs/rena-upstream-issues.md#2-regression-axes-are-named-after-the-first-edge-not-the-predictor) | Regression axes named after the first edge (`A & B_reg`), not the predictor; duplicate names with x+y | Low | Names after the predictor |
+| [3](docs/rena-upstream-issues.md#3-the-documented-x_var-form-raises-an-error) | The documented `"lm(formula=V ~ ...)"` param form errors | Low | Takes the plain formula |
+| [4](docs/rena-upstream-issues.md#4-enarotatebyhenaregression_2-errors-cryptically-on-rank-deficient-input) | `regression_2` errors cryptically on rank-deficient input | Low | Differs, but **not** better — see the doc |
+| [5](docs/rena-upstream-issues.md#5-enarotationh-emits-a-datatable-warning-on-every-call) | `ena.rotation.h` warns on every call | Trivial | n/a |
+
+These are **rENA issues, not pyENA bugs**, reported as observations rather than accusations — they may be fixed upstream or intended. Only #1 changes pyENA's output relative to rENA:
+
+> Given both `x_var` and `y_var`, `rotate_by_regression` returns a **different y axis than rENA**, deliberately. rENA means to regress y on the x-deflated points (`ena.rotate.by.regression.R` sets `V <- defA` first), but that never takes effect: `with.ena.matrix` rebinds `V` to the raw points unless passed a `V =` argument, and a refactor dropped it. Its sibling `ena.rotate.by.generalized` deflates correctly on the same data. pyENA deflates, so its axes are orthogonal and its x axis matches rENA exactly. If rENA fixes this, pyENA will match it column-for-column.
+
+The overwhelming majority of rENA matched pyENA exactly, kernel for kernel — and the two pyENA defects found in the same effort were worse (see [`CHANGELOG.md`](CHANGELOG.md)).
 
 ## Development
 

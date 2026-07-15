@@ -147,6 +147,7 @@ wrong on data of rank > `dimensions`, so results from 0.0.1 should be regenerate
 
 - The web app is built lazily, so importing `pyena.web.api` no longer constructs a
   FastAPI instance — or raises when the `[web]` extra is absent.
-- Not published to PyPI: the `pyena` name belongs to an unrelated project.
+- Released to PyPI as `ena-python` (see Unreleased): the `pyena` name belongs to
+  an unrelated project, so this release went out under the new name.
 
 [0.1.0]: https://github.com/HUDongpin/ena-python/releases/tag/v0.1.0

@@ -137,13 +137,26 @@ Golden fixtures are generated from **real, compiled rENA 0.3.1** and stamped wit
 | Area | Checked against rENA? |
 |---|---|
 | EndPoint accumulation, moving-stanza window | **Yes** — incl. infinite windows vs the compiled C++ kernel |
+| Conversation window | **Yes** — accumulation and full model |
+| AccumulatedTrajectory / SeparateTrajectory | **Yes** — accumulation and full model |
 | Sphere/skip normalization, centering | **Yes** |
 | SVD rotation, points, node positions, centroids | **Yes** (sign-aligned) |
 | `variance`, `eigenvalues` | **Yes** — incl. a rank-3 case where a truncated denominator is wrong |
+| Generalized rotation (`gmr`) | **Yes** — numeric and categorical targets, and x+y |
+| hENA regression / regression_2 | **Yes** for the x axis; y axis diverges by design (see below) |
+| hENA `rotation_h` | **Yes** — incl. control variables |
 | Mean rotation | Partly — `MR1`/`SVD2` only |
-| Conversation window, trajectory models | **No** — smoke-tested only |
-| Generalized / regression / hENA rotations | **No** — smoke-tested only; treat as unverified |
 | Cohen's d, `ena_correlations` | **No** |
+
+### Known divergence: two-formula regression rotation
+
+Given both `x_var` and `y_var`, `rotate_by_regression` returns a **different y axis than rENA** — deliberately.
+
+rENA means to regress y on the x-deflated points (`ena.rotate.by.regression.R` sets `V <- defA` first), but that assignment never takes effect: its `with.ena.matrix` helper rebinds `V` to the raw points unless passed a `V =` argument, and a refactor dropped it. rENA therefore regresses y on undeflated points and returns axes that are strongly collinear (cosine ~0.8–0.97 on our fixtures), making its "2D" projection nearly one-dimensional. Its sibling `ena.rotate.by.generalized` deflates correctly on the same data.
+
+pyENA deflates, so its axes are orthogonal. The x axis matches rENA exactly. If rENA fixes this, pyENA will match it column-for-column.
+
+pyENA also names regression axes after the predictor (`score_reg`) where rENA names them after the first edge (`A & B_reg`) — an rENA naming bug from the same string/formula confusion. Names are cosmetic; the vectors match.
 
 See [`docs/testing_strategy.md`](docs/testing_strategy.md) and [`reference/README.md`](reference/README.md).
 

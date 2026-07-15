@@ -16,6 +16,11 @@ This pass adds a generated R oracle fixture at
   `as.matrix(vector)` coercion.
 - Generalized, regression, and hENA rotations were outside this pass. They have
   since been implemented (see `003_plot_web_rotation_mvp.md` and
-  `docs/migration_guide.md`), so they no longer raise `NotImplementedError`.
-  They carry smoke tests but **no numeric rENA parity fixture yet** — treat their
-  output as unverified against rENA.
+  `docs/migration_guide.md`), so they no longer raise `NotImplementedError`, and
+  they are now pinned to real compiled rENA 0.3.1 by
+  `test_advanced_rotations_match_r_oracle` across 9 cases (numeric and categorical
+  targets, x+y, and control variables).
+- One deliberate divergence: with both `x_var` and `y_var`, `rotate_by_regression`
+  returns a different y axis than rENA, because rENA fails to deflate there and
+  produces near-collinear axes. See the `rotate_by_regression` docstring and
+  `test_regression_xy_axes_are_orthogonal_unlike_rena`.

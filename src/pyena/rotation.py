@@ -406,7 +406,29 @@ def rotate_by_regression(
     codes: list[str] | None = None,
     dimensions: int = 2,
 ) -> ENARotationSet:
-    """Port rENA hENA regression rotation where formulas have `V` as outcome."""
+    """Port rENA hENA regression rotation where formulas have `V` as outcome.
+
+    Formulas are plain strings such as ``"V ~ score"``, where ``V`` stands for the ENA
+    points. (rENA's own docstring shows ``"lm(formula=V ~ ...)"``, but its code calls
+    ``formula(params$x_var)``, which only accepts the plain form.)
+
+    The x vector matches rENA exactly. **The y vector deliberately does not**, when
+    both ``x_var`` and ``y_var`` are given:
+
+    rENA intends to regress y on the x-deflated points -- ``ena.rotate.by.regression.R``
+    sets ``V <- defA`` before the call. That assignment has no effect: the
+    ``with.ena.matrix`` helper rebinds ``V`` to the raw ``points.for.projection``
+    unless a ``V =`` argument is passed (``ena.rotate.by.regression.2.R:18-29``), and a
+    refactor dropped that argument -- the commented-out line above the call still shows
+    it. rENA therefore regresses y on undeflated points and returns x/y axes that are
+    strongly collinear (cosine ~0.8-0.97), so its "2D" projection is close to
+    one-dimensional. Its sibling `rotate_by_generalized` deflates correctly on the same
+    data, which is what marks this as a defect rather than a design choice.
+
+    pyENA deflates, yielding orthogonal axes. Anyone comparing a two-formula regression
+    rotation against rENA will therefore see a different y axis; that is intended. See
+    `tests/test_r_oracle_parity.py::test_regression_xy_axes_are_orthogonal_unlike_rena`.
+    """
 
     if not isinstance(params, dict) or "x_var" not in params:
         raise ValueError("params must provide x_var")

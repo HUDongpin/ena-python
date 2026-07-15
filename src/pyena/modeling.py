@@ -123,6 +123,31 @@ def _centroids_from_nodes(
     return centroids
 
 
+def _point_labels(enadata: ENAData) -> pd.DataFrame:
+    """Identifier columns to prepend to projected points.
+
+    rENA binds the trajectory frame for Trajectory models and the metadata frame
+    otherwise (`ena.make.set.R:257-262`). Trajectory points are one row per
+    unit-and-step, so without the conversation column there is no way to tell the
+    steps apart or order them -- which is the whole point of a trajectory.
+
+    pyENA keeps any extra metadata columns alongside the trajectory columns. rENA
+    drops them here; carrying them is a superset, so every rENA column is still
+    present with the same values, and callers can still group or color points by
+    metadata.
+    """
+
+    meta = enadata.meta_data.reset_index(drop=True)
+    if "Trajectory" not in (enadata.model_type or "") or enadata.trajectories is None:
+        return meta
+
+    trajectories = enadata.trajectories.reset_index(drop=True)
+    extra = [col for col in meta.columns if col not in trajectories.columns]
+    if not extra:
+        return trajectories
+    return pd.concat([trajectories, meta.loc[:, extra]], axis=1)
+
+
 def make_set(
     enadata: ENAData,
     *,
@@ -198,9 +223,7 @@ def make_set(
     rotation.center_vec = center_vec
 
     projected = project(centered_numeric, rotation)
-    points = pd.concat(
-        [enadata.meta_data.reset_index(drop=True), projected.reset_index(drop=True)], axis=1
-    )
+    points = pd.concat([_point_labels(enadata), projected.reset_index(drop=True)], axis=1)
 
     if supplied_rotation:
         nodes = rotation.node_positions.copy()

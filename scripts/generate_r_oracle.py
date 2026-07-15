@@ -391,6 +391,90 @@ rank3_model <- list(
   variance = unname(rank3_set$model$variance)
 )
 
+# --- Model-level fixtures for the Conversation window and both trajectory models --
+# The accumulate-level fixtures below were generated but never asserted. Carrying the
+# modeled output too pins the whole pipeline (normalize -> center -> rotate -> project)
+# for these model types, not just the co-occurrence counts.
+model_for <- function(model = "EndPoint", window = "MovingStanzaWindow") {
+  a <- ena.accumulate.data(
+    units = toy[, c("unit"), drop = FALSE],
+    conversation = toy[, c("conv"), drop = FALSE],
+    metadata = toy[, c("group", "score"), drop = FALSE],
+    codes = toy[, codes, drop = FALSE],
+    model = model, window = window, window.size.back = 2, as.list = TRUE
+  )
+  s <- ena.make.set(a, dimensions = 2)
+  out <- list(
+    line_weights = plain_df(s$line.weights),
+    points = plain_df(s$points),
+    rotation_matrix = plain_df(s$rotation$rotation.matrix),
+    eigenvalues = unname(s$rotation$eigenvalues),
+    center_vec = unname(s$rotation$center.vec),
+    nodes = plain_df(s$rotation$nodes),
+    centroids = plain_df(s$model$centroids),
+    variance = unname(s$model$variance),
+    unit_labels = a$model$unit.labels
+  )
+  if (!is.null(a$trajectories)) out$trajectories <- plain_df(a$trajectories)
+  out
+}
+
+# --- Rotation fixtures ------------------------------------------------------
+# 8 units x 4 codes, with a unit-level categorical (grp) and numeric (score)
+# covariate. gmr() branches on whether the target is numeric, so both are needed.
+rot_rows <- data.frame(
+  unit  = rep(paste0("U", 1:8), each = 6),
+  conv  = rep(rep(c("c1", "c2"), each = 3), times = 8),
+  grp   = rep(c("g1", "g2"), each = 24),
+  score = rep(seq(10, 80, by = 10), each = 6),
+  A = c(1,0,1,0,1,1, 0,1,1,1,0,0, 1,1,0,1,0,1, 0,0,1,0,1,0,
+        1,0,0,1,1,0, 0,1,1,0,0,1, 1,1,0,0,1,0, 0,0,1,1,0,1),
+  B = c(0,1,1,1,0,0, 1,1,0,0,1,1, 0,1,1,0,1,0, 1,0,0,1,0,1,
+        0,1,1,0,0,1, 1,0,0,1,1,0, 0,1,0,1,0,1, 1,0,1,0,1,0),
+  C = c(1,1,0,0,1,0, 1,0,1,0,1,0, 1,0,0,1,1,1, 0,1,1,1,0,0,
+        1,1,0,0,1,1, 0,0,1,1,0,1, 1,0,1,0,0,1, 0,1,0,1,1,0),
+  D = c(0,0,1,1,0,1, 0,1,0,1,0,1, 0,1,1,0,0,1, 1,1,0,0,1,0,
+        0,0,1,1,0,1, 1,1,0,0,1,0, 0,1,1,1,0,0, 1,0,0,1,0,1),
+  stringsAsFactors = FALSE
+)
+rot_codes <- c("A", "B", "C", "D")
+rot_accum <- ena.accumulate.data(
+  units = rot_rows[, c("unit"), drop = FALSE],
+  conversation = rot_rows[, c("conv"), drop = FALSE],
+  metadata = rot_rows[, c("grp", "score"), drop = FALSE],
+  codes = rot_rows[, rot_codes, drop = FALSE],
+  window.size.back = 2, as.list = TRUE
+)
+rot_base <- ena.make.set(rot_accum, dimensions = 2)
+
+rotation_case <- function(fn, params) {
+  res <- tryCatch(fn(rot_base, params), error = function(e) NULL)
+  if (is.null(res)) return(NULL)
+  rm_ <- if (!is.null(res$rotation.matrix)) res$rotation.matrix else res$rotation
+  list(colnames = colnames(rm_), values = plain_df(as.data.frame(unname(as.data.frame(rm_)))))
+}
+
+rotations <- list(
+  generalized_score  = rotation_case(ena.rotate.by.generalized,
+                         list(x_var = rot_base$meta.data[, "score", drop = FALSE])),
+  generalized_grp    = rotation_case(ena.rotate.by.generalized,
+                         list(x_var = rot_base$meta.data[, "grp", drop = FALSE])),
+  generalized_xy     = rotation_case(ena.rotate.by.generalized,
+                         list(x_var = rot_base$meta.data[, "score", drop = FALSE],
+                              y_var = rot_base$meta.data[, "grp", drop = FALSE])),
+  regression_score   = rotation_case(ena.rotate.by.hena.regression, list(x_var = "V ~ score")),
+  regression_grp     = rotation_case(ena.rotate.by.hena.regression, list(x_var = "V ~ grp")),
+  # Recorded but NOT asserted column-for-column: rENA regresses y on the *undeflated*
+  # points here, so its x and y axes come out ~97% collinear. See
+  # test_regression_xy_axes_are_orthogonal_unlike_rena.
+  regression_xy      = rotation_case(ena.rotate.by.hena.regression,
+                         list(x_var = "V ~ score", y_var = "V ~ grp")),
+  regression2_score  = rotation_case(ena.rotate.by.hena.regression_2, list(x_var = "score ~ V")),
+  rotation_h_grp     = rotation_case(ena.rotation.h, list(x_var = "grp")),
+  rotation_h_score   = rotation_case(ena.rotation.h, list(x_var = "score")),
+  rotation_h_ctrl    = rotation_case(ena.rotation.h, list(x_var = "grp", control_vars = c("score")))
+)
+
 payload <- list(
   provenance = list(
     oracle_mode = oracle$mode,
@@ -403,6 +487,16 @@ payload <- list(
   ),
   input = plain_df(toy),
   codes = codes,
+  models = list(
+    conversation = model_for(window = "Conversation"),
+    accumulated_trajectory = model_for(model = "AccumulatedTrajectory"),
+    separate_trajectory = model_for(model = "SeparateTrajectory")
+  ),
+  rotations = list(
+    input = plain_df(rot_rows),
+    codes = rot_codes,
+    cases = rotations
+  ),
   rank3 = list(
     input = plain_df(rank3),
     codes = codes4,

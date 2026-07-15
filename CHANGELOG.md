@@ -3,6 +3,49 @@
 All notable changes to pyENA are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versioning is [SemVer](https://semver.org/).
 
+## [Unreleased]
+
+Closes the parity gaps 0.1.0 shipped with: trajectory models, the Conversation
+window, and the four advanced rotations are now pinned to real compiled rENA 0.3.1
+instead of being smoke-tested only.
+
+### Fixed
+
+- **Trajectory points lost the conversation column.** rENA binds the trajectory frame
+  to points for Trajectory models and the metadata frame otherwise
+  (`ena.make.set.R:257-262`); pyENA always bound metadata. Trajectory points are one
+  row per unit-and-step, so without `conv` the steps could not be told apart or
+  ordered — the entire point of a trajectory. `points` now carries `unit`,
+  `ENA_UNIT`, and `conv` for Trajectory models, plus any metadata columns (a superset
+  of rENA, which drops them, so grouping and coloring still work).
+
+### Added
+
+- Numeric parity for the **Conversation window** and **both trajectory models**, at
+  accumulation *and* full-model level (points, variance, eigenvalues, center vector,
+  node positions). All matched rENA on arrival; the gap was evidence, not defects.
+- Numeric parity for the **generalized, regression, regression_2, and hENA rotations**
+  across 9 cases — numeric and categorical targets (`gmr` branches on this), combined
+  x+y, and control variables. All 9 match rENA across every dimension.
+- A rotation fixture dataset (8 units × 4 codes) with unit-level categorical and
+  numeric covariates, and model-level fixtures per model type.
+
+### Changed
+
+- **`rotate_by_regression` deliberately diverges from rENA on the y axis** when given
+  both `x_var` and `y_var`. rENA intends to regress y on the x-deflated points
+  (`V <- defA`), but its `with.ena.matrix` helper rebinds `V` to the raw points unless
+  passed a `V =` argument, and a refactor dropped it — the commented-out line above
+  the call still shows it. rENA therefore returns axes that are strongly collinear
+  (cosine ~0.8–0.97), making its "2D" projection nearly one-dimensional, while its
+  sibling `ena.rotate.by.generalized` deflates correctly on the same data. pyENA
+  deflates, giving orthogonal axes; the x axis still matches rENA exactly. A test
+  fails if rENA ever fixes this, prompting pyENA to match it.
+- Regression axes are named after the predictor (`score_reg`) rather than rENA's
+  `A & B_reg`, which comes from the same string/formula confusion (`all.vars()` on a
+  string returns nothing, so rENA falls back to the first edge name). Cosmetic; the
+  vectors match.
+
 ## [0.1.0] — 2026-07-15
 
 First public release. Addresses the findings of the 2026-07-15 technical review of

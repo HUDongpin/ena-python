@@ -4,6 +4,8 @@ Notes recorded while porting [rENA](https://gitlab.com/epistemic-analytics/qe-pa
 
 This exists for two reasons: so pyENA users understand why a given result may not match rENA, and so the findings are in a form the rENA maintainers can check and act on if they wish.
 
+Each is also tracked as an issue under the [`upstream-rena`](https://github.com/HUDongpin/pyENA/issues?q=label%3Aupstream-rena) label: [#1](https://github.com/HUDongpin/pyENA/issues/1), [#2](https://github.com/HUDongpin/pyENA/issues/2), [#3](https://github.com/HUDongpin/pyENA/issues/3), [#4](https://github.com/HUDongpin/pyENA/issues/4), [#5](https://github.com/HUDongpin/pyENA/issues/5). Those are **not** pyENA bugs; they live on this tracker because they came out of this port.
+
 **Scope and caveats**
 
 - Tested against **rENA 0.3.1** (the version pinned in [`reference/rENA_manifest.json`](../reference/rENA_manifest.json)) on R 4.4.2, `aarch64-apple-darwin20`, with the installed compiled package.
@@ -41,6 +43,8 @@ rot <- function(r) as.matrix(r$rotation)
 ---
 
 ## 1. `ena.rotate.by.hena.regression` does not deflate the y axis
+
+Tracked as [#1](https://github.com/HUDongpin/pyENA/issues/1).
 
 **Severity: high — affects returned coordinates.**
 
@@ -106,6 +110,8 @@ Note that the *subsequent* deflation on line 130 (`defA <- defA - defA %*% v2 %*
 
 ## 2. Regression axes are named after the first edge, not the predictor
 
+Tracked as [#2](https://github.com/HUDongpin/pyENA/issues/2).
+
 **Severity: low — cosmetic, but produces duplicate column names.**
 
 ```r
@@ -136,6 +142,8 @@ all.vars(as.formula("V ~ score"))   # "V" "score"
 
 ## 3. The documented `x_var` form raises an error
 
+Tracked as [#3](https://github.com/HUDongpin/pyENA/issues/3).
+
 **Severity: low — documentation/code mismatch.**
 
 `ena.rotate.by.regression.R:11` documents:
@@ -162,6 +170,8 @@ ena.rotate.by.hena.regression(set, list(x_var = "V ~ score"))
 
 ## 4. `ena.rotate.by.hena.regression_2` errors cryptically on rank-deficient input
 
+Tracked as [#4](https://github.com/HUDongpin/pyENA/issues/4).
+
 **Severity: low — diagnostics.**
 
 `regression_2` fits `lm(score ~ V)`, needing `n_edges + 1` parameters. With fewer units than that, the fit is rank-deficient, R returns `NA` coefficients, and the error surfaces from an unrelated line:
@@ -181,6 +191,8 @@ With 7+ units and the same 4 codes it succeeds. The underlying situation is legi
 ---
 
 ## 5. `ena.rotation.h` emits a `data.table` warning on every call
+
+Tracked as [#5](https://github.com/HUDongpin/pyENA/issues/5).
 
 **Severity: trivial — noise.**
 

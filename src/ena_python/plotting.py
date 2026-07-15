@@ -45,19 +45,19 @@ def _plotly_go() -> Any:
     try:
         import plotly.graph_objects as go
     except ImportError as exc:  # pragma: no cover
-        raise RuntimeError("Install pyENA[plot] to use plotting") from exc
+        raise RuntimeError("Install ena-python[plot] to use plotting") from exc
     return go
 
 
 def _attach_set(fig: Any, enaset: ENASet) -> Any:
-    object.__setattr__(fig, "_pyena_set", enaset)
+    object.__setattr__(fig, "_ena_python_set", enaset)
     return fig
 
 
 def _get_set(fig: Any, enaset: ENASet | None) -> ENASet:
     if enaset is not None:
         return enaset
-    stored = getattr(fig, "_pyena_set", None)
+    stored = getattr(fig, "_ena_python_set", None)
     if stored is None:
         raise ValueError("Pass enaset=... when the figure was not created by ena_plot")
     return stored
@@ -119,7 +119,7 @@ def ena_plot(
         yaxis={"title": y_dim, "range": [-max_abs, max_abs], "zeroline": True, "scaleanchor": "x"},
         template="plotly_white",
         showlegend=True,
-        meta={"pyena_dimensions": [x_dim, y_dim]},
+        meta={"ena_python_dimensions": [x_dim, y_dim]},
     )
     return _attach_set(fig, enaset)
 

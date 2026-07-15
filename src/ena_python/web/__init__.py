@@ -1,1 +1,1 @@
-"""Optional web API helpers for pyENA."""
+"""Optional web API helpers for ena-python."""

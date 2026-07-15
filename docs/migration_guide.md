@@ -1,10 +1,10 @@
 # Migration Guide
 
-pyENA uses Python naming and objects while preserving rENA semantics where parity fixtures exist.
+ena-python uses Python naming and objects while preserving rENA semantics where parity fixtures exist.
 
 ## Function Names
 
-| rENA | pyENA |
+| rENA | ena-python |
 |---|---|
 | `ena(...)` | `ena(...)` |
 | `ena.accumulate.data(...)` | `ena_accumulate_data(...)` or `accumulate_data(...)` |
@@ -19,7 +19,7 @@ pyENA uses Python naming and objects while preserving rENA semantics where parit
 
 ## Argument Names
 
-| rENA argument | pyENA argument |
+| rENA argument | ena-python argument |
 |---|---|
 | `units.by` | `units` or `units_by` |
 | `conversations.by` | `conversation` or `conversations_by` |
@@ -35,7 +35,7 @@ pyENA uses Python naming and objects while preserving rENA semantics where parit
 
 ## Object Shape
 
-Core pyENA objects are dataclasses with `to_dict()` methods:
+Core ena-python objects are dataclasses with `to_dict()` methods:
 
 - `ENAData`: raw rows, metadata, unit-level connection counts, row-level connection counts, trajectories, and function parameters.
 - `ENASet`: line weights, centered projection inputs, points, node positions, centroids, variance, and rotation data.

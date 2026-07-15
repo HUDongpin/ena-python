@@ -1,4 +1,4 @@
-"""Optional FastAPI service for pyENA.
+"""Optional FastAPI service for ena-python.
 
 **Intended for localhost / trusted-network use.** The endpoints run unbounded
 linear algebra over caller-supplied data and have no authentication. `max_rows`
@@ -30,19 +30,21 @@ DEFAULT_MAX_ROWS = 100_000
 
 Accumulation is a Python-level loop over rows x code-pairs, so an unbounded
 request body is a cheap way to exhaust CPU/memory. Override via `create_app(
-max_rows=...)` or the PYENA_WEB_MAX_ROWS environment variable.
+max_rows=...)` or the ENA_PYTHON_WEB_MAX_ROWS environment variable.
 """
 
 
 def _resolve_max_rows(max_rows: int | None) -> int:
     if max_rows is not None:
         return max_rows
-    configured = os.environ.get("PYENA_WEB_MAX_ROWS")
+    configured = os.environ.get("ENA_PYTHON_WEB_MAX_ROWS")
     if configured:
         try:
             return int(configured)
         except ValueError as exc:
-            raise ValueError(f"PYENA_WEB_MAX_ROWS must be an integer, got {configured!r}") from exc
+            raise ValueError(
+                f"ENA_PYTHON_WEB_MAX_ROWS must be an integer, got {configured!r}"
+            ) from exc
     return DEFAULT_MAX_ROWS
 
 
@@ -51,14 +53,14 @@ def create_app(*, max_rows: int | None = None) -> Any:
 
     Args:
         max_rows: Reject requests carrying more than this many rows with HTTP 413.
-            Defaults to PYENA_WEB_MAX_ROWS, else DEFAULT_MAX_ROWS.
+            Defaults to ENA_PYTHON_WEB_MAX_ROWS, else DEFAULT_MAX_ROWS.
     """
 
     try:
         from fastapi import FastAPI, HTTPException
         from pydantic import BaseModel, Field
     except ImportError as exc:  # pragma: no cover
-        raise RuntimeError("Install pyENA[web] to use the FastAPI app") from exc
+        raise RuntimeError("Install ena-python[web] to use the FastAPI app") from exc
 
     row_limit = _resolve_max_rows(max_rows)
 
@@ -75,7 +77,7 @@ def create_app(*, max_rows: int | None = None) -> Any:
         weight_by: str = "binary"
         dimensions: int = 2
 
-    app = FastAPI(title="pyENA API", version=__version__)
+    app = FastAPI(title="ena-python API", version=__version__)
 
     def check_size(req: ENARequest) -> None:
         if len(req.rows) > row_limit:
@@ -83,7 +85,7 @@ def create_app(*, max_rows: int | None = None) -> Any:
                 status_code=413,
                 detail=(
                     f"Request carries {len(req.rows)} rows, above the {row_limit}-row limit. "
-                    "Raise it with PYENA_WEB_MAX_ROWS or create_app(max_rows=...)."
+                    "Raise it with ENA_PYTHON_WEB_MAX_ROWS or create_app(max_rows=...)."
                 ),
             )
 

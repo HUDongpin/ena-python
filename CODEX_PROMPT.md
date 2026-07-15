@@ -1,6 +1,6 @@
-# Codex prompt: build pyENA from rENA
+# Codex prompt: build ena-python from rENA
 
-You are working in a repository named `pyENA`. Your mission is to rewrite the uploaded R package `rENA` into a production-quality Python package named `pyENA` that is fast enough for website/backend use while preserving rENA's semantics.
+You are working in a repository named `ena-python`. Your mission is to rewrite the uploaded R package `rENA` into a production-quality Python package named `ena-python` that is fast enough for website/backend use while preserving rENA's semantics.
 
 ## Context
 
@@ -12,7 +12,7 @@ The original R package source is available in `reference/rENA/`. Important direc
 - `reference/rENA/man/`: generated R documentation for function semantics
 - `reference/rENA/data/RS.data.rda` and `reference/rENA/inst/extdata/sample-data/`: small reference datasets
 
-The Python scaffold is in `src/pyena/` and tests are in `tests/`.
+The Python scaffold is in `src/ena_python/` and tests are in `tests/`.
 
 ## Product goal
 
@@ -59,12 +59,12 @@ set_ = model(data, dimensions=2)
 
 Port and verify the primitives from `reference/rENA/src/ena.cpp`:
 
-- `vector_to_ut` -> `pyena.matrix.vector_to_ut`
-- `svector_to_ut` -> `pyena.matrix.adjacency_names`
-- `rows_to_co_occurrences` -> `pyena.matrix.rows_to_co_occurrences`
-- `ref_window_df` -> `pyena.matrix.ref_window_matrix`
-- `fun_sphere_norm` and `fun_skip_sphere_norm` -> `pyena.normalize`
-- `center_data_c` -> `pyena.rotation.center`
+- `vector_to_ut` -> `ena_python.matrix.vector_to_ut`
+- `svector_to_ut` -> `ena_python.matrix.adjacency_names`
+- `rows_to_co_occurrences` -> `ena_python.matrix.rows_to_co_occurrences`
+- `ref_window_df` -> `ena_python.matrix.ref_window_matrix`
+- `fun_sphere_norm` and `fun_skip_sphere_norm` -> `ena_python.normalize`
+- `center_data_c` -> `ena_python.rotation.center`
 
 Write tests that compare against hard-coded small examples and then generated R fixtures.
 
@@ -98,7 +98,7 @@ Port plotting semantics to Plotly and make them JSON/web friendly:
 
 - `ena.plot`, `add_points`, `add_group`, `add_network`, `add_nodes`, `with_trajectory`
 - expose `ENASet.to_dict()` / `to_json()` suitable for a frontend
-- complete the FastAPI example in `examples/fastapi_service.py` and `src/pyena/web/api.py`
+- complete the FastAPI example in `examples/fastapi_service.py` and `src/ena_python/web/api.py`
 
 ### Phase 5: performance
 

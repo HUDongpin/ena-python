@@ -1,6 +1,6 @@
 # Plot, Web, And Rotation MVP
 
-This pass expands pyENA from core R oracle parity into a more usable package surface.
+This pass expands ena-python from core R oracle parity into a more usable package surface.
 
 ## Implemented
 
@@ -10,7 +10,7 @@ This pass expands pyENA from core R oracle parity into a more usable package sur
 - Plotly helpers cover the main rENA plotting families: base plot, points, groups, network edges, nodes, and trajectories.
 - FastAPI exposes `/accumulate`, `/model`, `/ena`, and `/plot`.
 - Advanced rotation families now have callable Python implementations: generalized means, regression, regression_2, and `rotation_h`.
-- `cohens_d`, `ena_correlation`, and `ena_correlations` are available in `pyena.stats`.
+- `cohens_d`, `ena_correlation`, and `ena_correlations` are available in `ena_python.stats`.
 
 ## Tests
 

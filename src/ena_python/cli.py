@@ -13,7 +13,7 @@ from pandas.errors import EmptyDataError
 from ena_python import __version__
 from ena_python.accumulation import accumulate_data
 from ena_python.api import ena
-from ena_python.exceptions import PyENAError
+from ena_python.exceptions import ENAError
 from ena_python.io import read_table
 from ena_python.modeling import make_set
 
@@ -56,7 +56,7 @@ def _validate_columns(df: pd.DataFrame, columns: Sequence[str], *, input_path: s
             "Missing input columns: "
             f"{', '.join(missing)}\n"
             f"Available columns: {available}\n"
-            f"Tip: run `pyena inspect {input_path}` to preview the file schema."
+            f"Tip: run `ena-python inspect {input_path}` to preview the file schema."
         )
 
 
@@ -169,7 +169,7 @@ def _run_plot(args: argparse.Namespace) -> int:
         add_nodes(fig)
     except RuntimeError as exc:
         raise RuntimeError(
-            'Plot support requires Plotly. Install it with: python -m pip install "pyENA[plot]"'
+            'Plot support requires Plotly. Install it with: python -m pip install "ena-python[plot]"'
         ) from exc
 
     if output is None:
@@ -188,7 +188,7 @@ def _run_plot(args: argparse.Namespace) -> int:
 
 def _run_version(args: argparse.Namespace) -> int:
     del args
-    print(f"pyENA {__version__}")
+    print(f"ena-python {__version__}")
     return 0
 
 
@@ -219,11 +219,11 @@ def _add_workflow_arguments(parser: argparse.ArgumentParser) -> None:
 
 
 def build_parser() -> argparse.ArgumentParser:
-    """Build the pyENA command-line parser."""
+    """Build the ena-python command-line parser."""
 
     parser = argparse.ArgumentParser(
-        prog="pyena",
-        description="Run pyENA accumulation, modeling, and plotting from local files.",
+        prog="ena-python",
+        description="Run ena-python accumulation, modeling, and plotting from local files.",
     )
     subparsers = parser.add_subparsers(dest="command", required=True)
 
@@ -246,21 +246,21 @@ def build_parser() -> argparse.ArgumentParser:
     inspect_parser.add_argument("--output", help="Output path; prints to stdout when omitted")
     inspect_parser.set_defaults(func=_run_inspect)
 
-    version_parser = subparsers.add_parser("version", help="Print the pyENA version")
+    version_parser = subparsers.add_parser("version", help="Print the ena-python version")
     version_parser.set_defaults(func=_run_version)
 
     return parser
 
 
 def main(argv: Sequence[str] | None = None) -> int:
-    """Run the pyENA command-line interface."""
+    """Run the ena-python command-line interface."""
 
     parser = build_parser()
     args = parser.parse_args(argv)
     try:
         return int(args.func(args))
-    except (PyENAError, RuntimeError, ValueError) as exc:
-        print(f"pyena: error: {exc}", file=sys.stderr)
+    except (ENAError, RuntimeError, ValueError) as exc:
+        print(f"ena-python: error: {exc}", file=sys.stderr)
         return 2
 
 

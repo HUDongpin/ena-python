@@ -1,4 +1,4 @@
-# Agent instructions for pyENA
+# Agent instructions for ena-python
 
 This repository is meant for AI-assisted porting from rENA to Python.
 
@@ -11,7 +11,7 @@ python -m pip install -e ".[dev,plot,web]"
 pytest
 ruff check .
 ruff format .
-mypy src/pyena
+mypy src/ena_python
 ```
 
 ## Ground rules

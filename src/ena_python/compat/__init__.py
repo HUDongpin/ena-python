@@ -1,1 +1,1 @@
-"""Compatibility utilities for comparing pyENA with rENA."""
+"""Compatibility utilities for comparing ena-python with rENA."""

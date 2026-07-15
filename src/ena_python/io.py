@@ -22,7 +22,7 @@ def read_table(path: str | Path, **kwargs: Any) -> pd.DataFrame:
         except ImportError as exc:
             raise ImportError(
                 "Reading .parquet files requires a Parquet engine, which is not part of "
-                "the pyENA core install. Install it with: pip install 'pyENA[parquet]' "
+                "the ena-python core install. Install it with: pip install 'ena-python[parquet]' "
                 "(or pip install pyarrow). CSV and TSV inputs need no extra packages."
             ) from exc
     if suffix in {".tsv", ".tab"}:

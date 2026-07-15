@@ -1,6 +1,6 @@
-# pyENA CLI Usage
+# ena-python CLI Usage
 
-The `pyena` command is an internal alpha command-line interface for running the core ENA workflow on local tabular files.
+The `ena-python` command is a command-line interface for running the core ENA workflow on local tabular files.
 
 ## Install From A Local Wheel
 
@@ -8,15 +8,15 @@ The `pyena` command is an internal alpha command-line interface for running the 
 python -m pip install -e ".[dev,plot,web]"
 python -m build
 python -m pip install dist/ena_python-*.whl
-pyena --help
+ena-python --help
 ```
 
 ## Input Files
 
-`pyena` reads CSV, TSV, and Parquet files through the same table reader used by the Python API. Column names are passed explicitly.
+`ena-python` reads CSV, TSV, and Parquet files through the same table reader used by the Python API. Column names are passed explicitly.
 
 ```bash
-pyena ena examples/cli_sample.csv \
+ena-python ena examples/cli_sample.csv \
   --units unit \
   --conversation conv \
   --codes A B C \
@@ -28,12 +28,12 @@ pyena ena examples/cli_sample.csv \
 ## Commands
 
 ```bash
-pyena accumulate INPUT.csv --units unit --conversation conv --codes A B C --output data.json
-pyena model INPUT.csv --units unit --conversation conv --codes A B C --output model.json
-pyena ena INPUT.csv --units unit --conversation conv --codes A B C --output ena.json
-pyena plot INPUT.csv --units unit --conversation conv --codes A B C --output plot.html
-pyena inspect INPUT.csv
-pyena version
+ena-python accumulate INPUT.csv --units unit --conversation conv --codes A B C --output data.json
+ena-python model INPUT.csv --units unit --conversation conv --codes A B C --output model.json
+ena-python ena INPUT.csv --units unit --conversation conv --codes A B C --output ena.json
+ena-python plot INPUT.csv --units unit --conversation conv --codes A B C --output plot.html
+ena-python inspect INPUT.csv
+ena-python version
 ```
 
 All analysis commands support:
@@ -47,7 +47,7 @@ All analysis commands support:
 
 ## Output
 
-`accumulate`, `model`, and `ena` write JSON generated from pyENA `to_dict()` methods. If `--output` is omitted, JSON is printed to stdout.
+`accumulate`, `model`, and `ena` write JSON generated from ena-python `to_dict()` methods. If `--output` is omitted, JSON is printed to stdout.
 
 `plot` writes either:
 
@@ -84,4 +84,4 @@ python scripts/validate_cli_release.py data/local/acceptance.csv \
   --window-size-back 2
 ```
 
-The helper writes outputs and `summary.json` to `data/local/pyena_cli_acceptance/`.
+The helper writes outputs and `summary.json` to `data/local/ena_python_cli_acceptance/`.

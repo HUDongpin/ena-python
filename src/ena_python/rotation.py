@@ -425,7 +425,7 @@ def rotate_by_regression(
     one-dimensional. Its sibling `rotate_by_generalized` deflates correctly on the same
     data, which is what marks this as a defect rather than a design choice.
 
-    pyENA deflates, yielding orthogonal axes. Anyone comparing a two-formula regression
+    ena-python deflates, yielding orthogonal axes. Anyone comparing a two-formula regression
     rotation against rENA will therefore see a different y axis; that is intended. See
     `tests/test_r_oracle_parity.py::test_regression_xy_axes_are_orthogonal_unlike_rena`.
     """

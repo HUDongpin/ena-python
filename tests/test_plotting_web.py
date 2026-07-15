@@ -136,11 +136,11 @@ def test_max_rows_env_override() -> None:
     assert _resolve_max_rows(7) == 7
 
     with pytest.MonkeyPatch.context() as mp:
-        mp.setenv("PYENA_WEB_MAX_ROWS", "11")
+        mp.setenv("ENA_PYTHON_WEB_MAX_ROWS", "11")
         assert _resolve_max_rows(None) == 11
         assert _resolve_max_rows(7) == 7, "explicit argument must win over the env var"
 
-        mp.setenv("PYENA_WEB_MAX_ROWS", "not-an-int")
+        mp.setenv("ENA_PYTHON_WEB_MAX_ROWS", "not-an-int")
         with pytest.raises(ValueError, match="must be an integer"):
             _resolve_max_rows(None)
 

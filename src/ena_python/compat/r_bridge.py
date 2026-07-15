@@ -15,7 +15,7 @@ class RUnavailableError(RuntimeError):
 def run_r_script(script: str, *, cwd: str | Path | None = None) -> dict[str, Any]:
     """Run a short R script and parse JSON from stdout.
 
-    This is for fixture generation only. Production pyENA must not depend on R.
+    This is for fixture generation only. Production ena-python must not depend on R.
     """
 
     if shutil.which("Rscript") is None:

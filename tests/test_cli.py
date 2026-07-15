@@ -81,7 +81,7 @@ def test_cli_help_and_version() -> None:
     assert "accumulate" in help_result.stdout
     assert "inspect" in help_result.stdout
     assert version_result.returncode == 0
-    assert version_result.stdout.startswith("pyENA ")
+    assert version_result.stdout.startswith("ena-python ")
 
 
 def test_cli_inspect_reports_schema(tmp_path: Path) -> None:
@@ -152,7 +152,7 @@ def test_cli_errors_for_missing_columns_and_bad_paths(tmp_path: Path) -> None:
     assert missing_column.returncode == 2
     assert "Missing input columns" in missing_column.stderr
     assert "Available columns:" in missing_column.stderr
-    assert "pyena inspect" in missing_column.stderr
+    assert "ena-python inspect" in missing_column.stderr
     assert missing_file.returncode == 2
     assert "Input file does not exist" in missing_file.stderr
 

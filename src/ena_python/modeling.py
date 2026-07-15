@@ -131,7 +131,7 @@ def _point_labels(enadata: ENAData) -> pd.DataFrame:
     unit-and-step, so without the conversation column there is no way to tell the
     steps apart or order them -- which is the whole point of a trajectory.
 
-    pyENA keeps any extra metadata columns alongside the trajectory columns. rENA
+    ena-python keeps any extra metadata columns alongside the trajectory columns. rENA
     drops them here; carrying them is a superset, so every rENA column is still
     present with the same values, and callers can still group or color points by
     metadata.

@@ -10,7 +10,7 @@ from typing import Any
 
 from ena_python.io import read_table
 
-DEFAULT_OUTPUT_DIR = Path("data/local/pyena_cli_acceptance")
+DEFAULT_OUTPUT_DIR = Path("data/local/ena_python_cli_acceptance")
 
 
 def _add_schema_args(parser: argparse.ArgumentParser) -> None:
@@ -31,7 +31,7 @@ def _add_schema_args(parser: argparse.ArgumentParser) -> None:
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        description="Validate a pyENA CLI release against a local tabular file."
+        description="Validate an ena-python CLI release against a local tabular file."
     )
     _add_schema_args(parser)
     parser.add_argument(
@@ -42,7 +42,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--skip-plot",
         action="store_true",
-        help="Skip plot validation when pyENA[plot] is not installed",
+        help="Skip plot validation when ena-python[plot] is not installed",
     )
     return parser
 
@@ -77,7 +77,7 @@ def _schema_args(args: argparse.Namespace) -> list[str]:
     return values
 
 
-def _run_pyena(command: str, args: argparse.Namespace, output: Path) -> dict[str, Any]:
+def _run_ena_python(command: str, args: argparse.Namespace, output: Path) -> dict[str, Any]:
     command_args = [
         sys.executable,
         "-m",
@@ -116,7 +116,7 @@ def main(argv: list[str] | None = None) -> int:
     if not args.skip_plot:
         commands.append(("plot", output_dir / "plot.html"))
 
-    results = [_run_pyena(command, args, output) for command, output in commands]
+    results = [_run_ena_python(command, args, output) for command, output in commands]
     summary = {
         "input": str(Path(args.input)),
         "rows": len(df),

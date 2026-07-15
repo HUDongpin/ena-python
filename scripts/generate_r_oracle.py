@@ -199,11 +199,11 @@ install_rcpp_fallbacks <- function() {
 #   1. installed-package : the released, compiled rENA. Authoritative.
 #   2. sourced-cpp       : vendored rENA R sources + Rcpp-compiled ena.cpp. Authoritative.
 #   3. r-fallback        : vendored R sources + pure-R transliterations of ena.cpp.
-#                          NOT authoritative -- the transliterations mirror pyENA's own
-#                          logic, so a fixture built this way can only prove that pyENA
+#                          NOT authoritative -- the transliterations mirror ena-python's own
+#                          logic, so a fixture built this way can only prove that ena-python
 #                          agrees with a re-implementation of itself. Fixtures generated
 #                          in this mode are refused for committing unless
-#                          PYENA_ALLOW_NONAUTHORITATIVE_ORACLE=1.
+#                          ENA_PYTHON_ALLOW_NONAUTHORITATIVE_ORACLE=1.
 load_installed_rena <- function() {
   if (!requireNamespace("rENA", quietly = TRUE)) return(NULL)
   suppressPackageStartupMessages(library(rENA))
@@ -534,13 +534,13 @@ def main() -> None:
     if not provenance.get("authoritative", False):
         message = (
             f"Oracle mode {provenance.get('oracle_mode')!r} is NOT authoritative: the pure-R\n"
-            "fallback re-implements ena.cpp along the same lines as pyENA, so a fixture built\n"
-            "from it cannot prove parity with rENA -- only that pyENA agrees with a\n"
+            "fallback re-implements ena.cpp along the same lines as ena-python, so a fixture built\n"
+            "from it cannot prove parity with rENA -- only that ena-python agrees with a\n"
             "re-implementation of itself.\n\n"
             "Install the rENA package (recommended), or provide full rENA sources with a\n"
-            "working C++ toolchain. Set PYENA_ALLOW_NONAUTHORITATIVE_ORACLE=1 to override."
+            "working C++ toolchain. Set ENA_PYTHON_ALLOW_NONAUTHORITATIVE_ORACLE=1 to override."
         )
-        if os.environ.get("PYENA_ALLOW_NONAUTHORITATIVE_ORACLE") != "1":
+        if os.environ.get("ENA_PYTHON_ALLOW_NONAUTHORITATIVE_ORACLE") != "1":
             raise SystemExit(message)
         print(f"WARNING: {message}", file=sys.stderr)
 

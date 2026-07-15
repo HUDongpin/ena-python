@@ -1,8 +1,8 @@
-# rENA to pyENA API map
+# rENA to ena-python API map
 
 Generated from the uploaded `rENA` package `NAMESPACE` and R source files. Use this as the living migration checklist.
 
-| rENA API | Proposed pyENA API | Source | Status | R arguments |
+| rENA API | Proposed ena-python API | Source | Status | R arguments |
 |---|---|---|---|---|
 | `ENARotationSet` | `ENARotationSet` | `` | rotation matrix/node/center serialization | `` |
 | `ENAdata` | `ENAData` | `` | dataclass scaffold | `` |

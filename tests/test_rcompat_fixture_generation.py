@@ -11,8 +11,8 @@ import pytest
 
 @pytest.mark.rcompat
 def test_rcompat_fixture_generation_smoke() -> None:
-    if os.environ.get("PYENA_RUN_RCOMPAT") != "1":
-        pytest.skip("Set PYENA_RUN_RCOMPAT=1 to regenerate R oracle fixtures")
+    if os.environ.get("ENA_PYTHON_RUN_RCOMPAT") != "1":
+        pytest.skip("Set ENA_PYTHON_RUN_RCOMPAT=1 to regenerate R oracle fixtures")
     if shutil.which("Rscript") is None:
         pytest.skip("Rscript is not installed")
 

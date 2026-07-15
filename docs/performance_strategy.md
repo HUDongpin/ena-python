@@ -1,6 +1,6 @@
 # Performance strategy
 
-pyENA exists because R-based ENA is difficult to scale for web workflows. Optimize in stages.
+ena-python exists because R-based ENA is difficult to scale for web workflows. Optimize in stages.
 
 ## Baseline
 

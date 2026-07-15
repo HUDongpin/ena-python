@@ -8,7 +8,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); version
 ### Changed — project, distribution, and import names (breaking)
 
 The project, the GitHub repository, and the PyPI distribution are now **ena-python**;
-the module is **`ena_python`**. It was pyENA. The CLI command is still `pyena`.
+the module is **`ena_python`**, and the CLI command is **`ena-python`**. It was pyENA.
 
 ```python
 pip install ena-python
@@ -35,7 +35,7 @@ instead of being smoke-tested only.
 
 - **Trajectory points lost the conversation column.** rENA binds the trajectory frame
   to points for Trajectory models and the metadata frame otherwise
-  (`ena.make.set.R:257-262`); pyENA always bound metadata. Trajectory points are one
+  (`ena.make.set.R:257-262`); ena-python always bound metadata. Trajectory points are one
   row per unit-and-step, so without `conv` the steps could not be told apart or
   ordered — the entire point of a trajectory. `points` now carries `unit`,
   `ENA_UNIT`, and `conv` for Trajectory models, plus any metadata columns (a superset
@@ -60,9 +60,9 @@ instead of being smoke-tested only.
   passed a `V =` argument, and a refactor dropped it — the commented-out line above
   the call still shows it. rENA therefore returns axes that are strongly collinear
   (cosine ~0.8–0.97), making its "2D" projection nearly one-dimensional, while its
-  sibling `ena.rotate.by.generalized` deflates correctly on the same data. pyENA
+  sibling `ena.rotate.by.generalized` deflates correctly on the same data. ena-python
   deflates, giving orthogonal axes; the x axis still matches rENA exactly. A test
-  fails if rENA ever fixes this, prompting pyENA to match it.
+  fails if rENA ever fixes this, prompting ena-python to match it.
 - Regression axes are named after the predictor (`score_reg`) rather than rENA's
   `A & B_reg`, which comes from the same string/formula confusion (`all.vars()` on a
   string returns nothing, so rENA falls back to the first edge name). Cosmetic; the
@@ -79,7 +79,7 @@ wrong on data of rank > `dimensions`, so results from 0.0.1 should be regenerate
 - **`variance` was normalized over only the retained dimensions** instead of the total
   across all of them, overstating every retained dimension whenever
   `rank(points) > dimensions`. rENA normalizes by the full projection
-  (`ena.make.set.R:332-335`). On a 6-unit / 4-code dataset, pyENA reported dimension 1
+  (`ena.make.set.R:332-335`). On a 6-unit / 4-code dataset, ena-python reported dimension 1
   as `0.810305` where rENA reports `0.738364` — 7.2 percentage points off. The 3-unit
   toy fixture has rank 2, so its ~0 third singular value made the two denominators
   agree and hid this. Now guarded by a rank-3 fixture.
@@ -89,7 +89,7 @@ wrong on data of rank > `dimensions`, so results from 0.0.1 should be regenerate
   them, so the divergence was invisible.
 - **Infinite forward moving-stanza windows** subtracted a head that rENA does not.
   rENA clamps an infinite forward window to the row count (`ena.cpp:236`), driving
-  `headRows <= 0` and skipping head subtraction (`ena.cpp:274-276`); pyENA substituted
+  `headRows <= 0` and skipping head subtraction (`ena.cpp:274-276`); ena-python substituted
   `0`. Finite windows and the common `forward=0` case were unaffected. The window is
   now pinned to rENA's compiled kernel across four configurations.
 - **FastAPI endpoints returned 422 for every request** when the module carried
@@ -115,8 +115,8 @@ wrong on data of rank > `dimensions`, so results from 0.0.1 should be regenerate
 - The golden-fixture generator prefers the **installed, compiled rENA** package and
   records provenance (oracle mode, rENA/R versions, platform) in every fixture. It
   refuses to write a fixture from the pure-R fallback unless
-  `PYENA_ALLOW_NONAUTHORITATIVE_ORACLE=1`, because those fallbacks re-implement
-  `ena.cpp` the way pyENA does — a fixture built from them could only show pyENA
+  `ENA_PYTHON_ALLOW_NONAUTHORITATIVE_ORACLE=1`, because those fallbacks re-implement
+  `ena.cpp` the way ena-python does — a fixture built from them could only show ena-python
   agreeing with a re-implementation of itself. The fallback was previously gated on
   `gfortran`, which `ena.cpp` (C++) does not need, so most machines silently used it.
 
@@ -127,7 +127,7 @@ wrong on data of rank > `dimensions`, so results from 0.0.1 should be regenerate
 - Parity assertions for `eigenvalues` and full-width `variance`; a provenance check
   that fails if a non-authoritative fixture is ever committed.
 - Request size cap on the web app (`create_app(max_rows=...)` /
-  `PYENA_WEB_MAX_ROWS`, default 100000), returning HTTP 413.
+  `ENA_PYTHON_WEB_MAX_ROWS`, default 100000), returning HTTP 413.
 - HTML escaping for dataset-derived Plotly labels. Plotly interprets a limited HTML
   subset in `text`/`hovertext`, so markup in a unit or code name was live in exported
   HTML.

@@ -1,16 +1,16 @@
 # Issues found in rENA 0.3.1
 
-Notes recorded while porting [rENA](https://gitlab.com/epistemic-analytics/qe-packages/rENA) to Python. Each item is a place where rENA's behavior appears to differ from what its own code, comments, or documentation intend, and where pyENA therefore does something different on purpose.
+Notes recorded while porting [rENA](https://gitlab.com/epistemic-analytics/qe-packages/rENA) to Python. Each item is a place where rENA's behavior appears to differ from what its own code, comments, or documentation intend, and where ena-python therefore does something different on purpose.
 
-This exists for two reasons: so pyENA users understand why a given result may not match rENA, and so the findings are in a form the rENA maintainers can check and act on if they wish.
+This exists for two reasons: so ena-python users understand why a given result may not match rENA, and so the findings are in a form the rENA maintainers can check and act on if they wish.
 
-Each is also tracked as an issue under the [`upstream-rena`](https://github.com/HUDongpin/ena-python/issues?q=label%3Aupstream-rena) label: [#1](https://github.com/HUDongpin/ena-python/issues/1), [#2](https://github.com/HUDongpin/ena-python/issues/2), [#3](https://github.com/HUDongpin/ena-python/issues/3), [#4](https://github.com/HUDongpin/ena-python/issues/4), [#5](https://github.com/HUDongpin/ena-python/issues/5). Those are **not** pyENA bugs; they live on this tracker because they came out of this port.
+Each is also tracked as an issue under the [`upstream-rena`](https://github.com/HUDongpin/ena-python/issues?q=label%3Aupstream-rena) label: [#1](https://github.com/HUDongpin/ena-python/issues/1), [#2](https://github.com/HUDongpin/ena-python/issues/2), [#3](https://github.com/HUDongpin/ena-python/issues/3), [#4](https://github.com/HUDongpin/ena-python/issues/4), [#5](https://github.com/HUDongpin/ena-python/issues/5). Those are **not** ena-python bugs; they live on this tracker because they came out of this port.
 
 **Scope and caveats**
 
 - Tested against **rENA 0.3.1** (the version pinned in [`reference/rENA_manifest.json`](../reference/rENA_manifest.json)) on R 4.4.2, `aarch64-apple-darwin20`, with the installed compiled package.
 - These may already be fixed upstream, or may be deliberate choices whose rationale is not visible in the source. **They are reported as observations, not as accusations**; if any is intended behavior, the fault is in this document and I would like to correct it.
-- Nothing here diminishes rENA. It is the reference implementation of ENA and the basis for this port; the great majority of it matched pyENA exactly, kernel for kernel. The two known **pyENA** defects found in the same effort were considerably worse — see [`CHANGELOG.md`](../CHANGELOG.md).
+- Nothing here diminishes rENA. It is the reference implementation of ENA and the basis for this port; the great majority of it matched ena-python exactly, kernel for kernel. The two known **ena-python** defects found in the same effort were considerably worse — see [`CHANGELOG.md`](../CHANGELOG.md).
 - Everything below is reproducible with the snippets given. Setup used by all of them:
 
 ```r
@@ -104,7 +104,7 @@ Note that the *subsequent* deflation on line 130 (`defA <- defA - defA %*% v2 %*
 **Suggested fix:** pass the deflated matrix explicitly, e.g.
 `with.ena.matrix(enaset$model$points.for.projection, { lm(formula(params$y_var)) }, V = defA)`.
 
-**What pyENA does.** Deflates, giving orthogonal axes. The x axis matches rENA exactly. `pyena.rotation.rotate_by_regression` documents this, and `test_regression_xy_axes_are_orthogonal_unlike_rena` fails if rENA starts deflating — the signal for pyENA to match it again.
+**What ena-python does.** Deflates, giving orthogonal axes. The x axis matches rENA exactly. `ena_python.rotation.rotate_by_regression` documents this, and `test_regression_xy_axes_are_orthogonal_unlike_rena` fails if rENA starts deflating — the signal for ena-python to match it again.
 
 ---
 
@@ -136,7 +136,7 @@ all.vars(as.formula("V ~ score"))   # "V" "score"
 
 **Suggested fix:** coerce first, e.g. `all.vars(as.formula(x))[2]`.
 
-**What pyENA does.** Names the axis after the predictor (`score_reg`, `grp_reg`). Names are cosmetic and the vectors match, so pyENA does not reproduce this.
+**What ena-python does.** Names the axis after the predictor (`score_reg`, `grp_reg`). Names are cosmetic and the vectors match, so ena-python does not reproduce this.
 
 ---
 
@@ -164,7 +164,7 @@ ena.rotate.by.hena.regression(set, list(x_var = "V ~ score"))
 
 **Suggested fix:** update the docs to the plain formula form (or accept both).
 
-**What pyENA does.** Accepts the plain formula form and documents it.
+**What ena-python does.** Accepts the plain formula form and documents it.
 
 ---
 
@@ -186,7 +186,7 @@ With 7+ units and the same 4 codes it succeeds. The underlying situation is legi
 
 **Suggested fix:** check for `NA` coefficients after the fit and report the rank deficiency directly.
 
-**What pyENA does.** Different, and **not obviously better**: `numpy.linalg.lstsq` returns the minimum-norm solution for an underdetermined system, so pyENA returns a finite, unit-norm rotation vector where rENA errors. That answer is one of infinitely many, so rENA's loud failure is arguably the safer behavior. Do not read pyENA's output on rank-deficient input as more trustworthy; treat it as unconstrained. Improving this in pyENA is tracked as future work.
+**What ena-python does.** Different, and **not obviously better**: `numpy.linalg.lstsq` returns the minimum-norm solution for an underdetermined system, so ena-python returns a finite, unit-norm rotation vector where rENA errors. That answer is one of infinitely many, so rENA's loud failure is arguably the safer behavior. Do not read ena-python's output on rank-deficient input as more trustworthy; treat it as unconstrained. Improving this in ena-python is tracked as future work.
 
 ---
 
@@ -202,11 +202,11 @@ ena.rotation.h(set, list(x_var = "grp"))
 #> Please remove the '..value_vars' variable in calling scope for clarity.
 ```
 
-The rotation itself is correct — pyENA matches it exactly, including with `control_vars` — but every call warns. This is the `data.table` `..var` prefix colliding with a local of the same name inside `ena.rotation.h`.
+The rotation itself is correct — ena-python matches it exactly, including with `control_vars` — but every call warns. This is the `data.table` `..var` prefix colliding with a local of the same name inside `ena.rotation.h`.
 
 **Suggested fix:** rename the local, or index with `.SDcols`.
 
-**What pyENA does.** Nothing to reproduce; noted only for anyone comparing console output.
+**What ena-python does.** Nothing to reproduce; noted only for anyone comparing console output.
 
 ---
 

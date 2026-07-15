@@ -1,4 +1,4 @@
-"""pyENA: Python tools for Epistemic Network Analysis."""
+"""ena-python: Python tools for Epistemic Network Analysis."""
 
 from ena_python.accumulation import (
     accumulate,

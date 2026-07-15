@@ -137,7 +137,7 @@ def test_fixture_provenance_is_authoritative() -> None:
     """The golden fixture must come from real rENA, not the pure-R fallback.
 
     The fallback in scripts/generate_r_oracle.py re-implements ena.cpp the same way
-    pyENA does, so a fixture built from it would only prove pyENA agrees with a
+    ena-python does, so a fixture built from it would only prove ena-python agrees with a
     re-implementation of itself.
     """
 
@@ -288,7 +288,7 @@ def test_trajectory_points_carry_the_step_column(model: str) -> None:
     """rENA binds the trajectory frame to trajectory points (ena.make.set.R:257).
 
     Without the conversation column a trajectory's points cannot be told apart or
-    ordered, which defeats the model. pyENA additionally keeps metadata columns, so
+    ordered, which defeats the model. ena-python additionally keeps metadata columns, so
     every rENA column is present with the same values plus extras.
     """
 
@@ -465,7 +465,7 @@ def test_advanced_rotations_match_r_oracle(case: str) -> None:
 
 
 def test_regression_xy_axes_are_orthogonal_unlike_rena() -> None:
-    """pyENA deliberately diverges from rENA for a two-formula regression rotation.
+    """ena-python deliberately diverges from rENA for a two-formula regression rotation.
 
     rENA computes the y vector by regressing on the *undeflated* points: its
     `with.ena.matrix` helper rebinds `V` to the raw points.for.projection
@@ -477,7 +477,7 @@ def test_regression_xy_axes_are_orthogonal_unlike_rena() -> None:
     fixture, 0.97 on other data), so its "2D" projection is close to
     one-dimensional. Its sibling ena.rotate.by.generalized deflates correctly on the
     same data, which is why this reads as a defect rather than a design choice.
-    pyENA deflates, giving orthogonal axes.
+    ena-python deflates, giving orthogonal axes.
     """
 
     from ena_python.rotation import rotate_by_regression
@@ -498,7 +498,7 @@ def test_regression_xy_axes_are_orthogonal_unlike_rena() -> None:
     x, y = matrix[:, 0], matrix[:, 1]
 
     cosine = float(x @ y / (np.linalg.norm(x) * np.linalg.norm(y)))
-    assert abs(cosine) < 1e-8, f"pyENA's regression x/y axes must be orthogonal, got {cosine}"
+    assert abs(cosine) < 1e-8, f"ena-python's regression x/y axes must be orthogonal, got {cosine}"
 
     # The x axis still matches rENA exactly; only y differs.
     expected = pd.DataFrame(fixture["rotations"]["cases"]["regression_xy"]["values"]).to_numpy(
@@ -515,9 +515,9 @@ def test_regression_xy_axes_are_orthogonal_unlike_rena() -> None:
     )
     # How collinear rENA's axes are depends on the data; that they are collinear at
     # all is the defect. A near-zero cosine here would mean rENA started deflating,
-    # and pyENA should then simply match it.
+    # and ena-python should then simply match it.
     assert abs(rena_cos) > 0.1, (
         f"rENA's regression_xy axes are unexpectedly close to orthogonal "
         f"(cos={rena_cos:.4f}). rENA may have fixed the missing deflation, in which "
-        f"case pyENA should match it column-for-column and this test should go."
+        f"case ena-python should match it column-for-column and this test should go."
     )

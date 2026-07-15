@@ -1,6 +1,6 @@
 # `reference/` — rENA reference material
 
-pyENA is a port of [rENA](https://gitlab.com/epistemic-analytics/qe-packages/rENA).
+ena-python is a port of [rENA](https://gitlab.com/epistemic-analytics/qe-packages/rENA).
 This directory holds the reference material used to establish parity.
 
 ## What is committed here
@@ -44,11 +44,11 @@ install.packages("rENA")   # or: remotes::install_gitlab("epistemic-analytics/qe
 | 3 | `r-fallback` — sources here + pure-R rewrites of `ena.cpp` | **No** |
 
 Mode 3 exists only so the generator can run without a C++ toolchain. It is **not**
-a valid source of committed fixtures: those pure-R rewrites mirror pyENA's own
-logic, so a fixture built from them would only show that pyENA agrees with a
+a valid source of committed fixtures: those pure-R rewrites mirror ena-python's own
+logic, so a fixture built from them would only show that ena-python agrees with a
 re-implementation of itself — it could pass even if both sides shared a bug. The
 generator refuses to write a fixture in mode 3 unless
-`PYENA_ALLOW_NONAUTHORITATIVE_ORACLE=1` is set, and
+`ENA_PYTHON_ALLOW_NONAUTHORITATIVE_ORACLE=1` is set, and
 `tests/test_r_oracle_parity.py::test_fixture_provenance_is_authoritative` fails if a
 non-authoritative fixture is ever committed.
 

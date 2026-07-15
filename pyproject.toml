@@ -23,7 +23,7 @@ classifiers = [
   "Programming Language :: Python :: 3.12",
   "Topic :: Scientific/Engineering :: Information Analysis",
 ]
-# Keep this list minimal: pyENA is intended to run under Pyodide/browser Python,
+# Keep this list minimal: ena-python is intended to run under Pyodide/browser Python,
 # where every extra wheel is a download and some (e.g. scikit-learn) may be
 # unavailable. Anything optional belongs in an extra below.
 dependencies = [
@@ -33,7 +33,7 @@ dependencies = [
 ]
 
 [project.scripts]
-pyena = "ena_python.cli:main"
+ena-python = "ena_python.cli:main"
 
 [project.optional-dependencies]
 plot = ["plotly>=5.20"]
@@ -96,7 +96,7 @@ markers = [
 target-version = "py310"
 line-length = 100
 src = ["src", "tests", "scripts"]
-# Vendored rENA sources are reference material, not pyENA code. docs/testing_strategy.md
+# Vendored rENA sources are reference material, not ena-python code. docs/testing_strategy.md
 # tells contributors to unpack them into the working tree, and rENA ships stray Python
 # prototypes under demo/backup/ that would otherwise fail `ruff check .`.
 extend-exclude = ["rENA-main", "reference", "dist", "build", ".venv"]
@@ -110,7 +110,7 @@ ignore = ["E501"]
 # interpreter runs it, and CI spans 3.10-3.13, so each job checks its own version.
 # Pinning 3.10 also made mypy parse *dependency* stubs under 3.10 syntax rules, and
 # numpy >= 2.2 ships stubs using PEP 695 `type` aliases that only parse as 3.12+ --
-# which failed the run before any pyENA code was checked.
+# which failed the run before any ena-python code was checked.
 packages = ["ena_python"]
 warn_unused_configs = true
 disallow_untyped_defs = true

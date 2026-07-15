@@ -8,8 +8,8 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from pyena import accumulate, make_set
-from pyena.rotation import rotate_by_mean
+from ena_python import accumulate, make_set
+from ena_python.rotation import rotate_by_mean
 
 FIXTURE = Path("tests/fixtures/r_oracle/generated/rena_parity_model.json")
 
@@ -382,8 +382,8 @@ def test_zero_network_center_alignment_matches_r_oracle_behavior() -> None:
 
 
 def _rotation_fixture(fixture: dict[str, Any]):
-    from pyena import accumulate as _acc
-    from pyena import make_set as _mk
+    from ena_python import accumulate as _acc
+    from ena_python import make_set as _mk
 
     rot = fixture["rotations"]
     accum = _acc(
@@ -399,7 +399,7 @@ def _rotation_fixture(fixture: dict[str, Any]):
 
 
 def _rotation_cases():
-    from pyena.rotation import (
+    from ena_python.rotation import (
         rotate_by_generalized,
         rotate_by_regression,
         rotate_by_regression_2,
@@ -480,7 +480,7 @@ def test_regression_xy_axes_are_orthogonal_unlike_rena() -> None:
     pyENA deflates, giving orthogonal axes.
     """
 
-    from pyena.rotation import rotate_by_regression
+    from ena_python.rotation import rotate_by_regression
 
     fixture = _load_fixture()
     if "rotations" not in fixture:

@@ -5,7 +5,7 @@ import os
 import sys
 from pathlib import Path
 
-from pyena.compat.r_bridge import run_r_script
+from ena_python.compat.r_bridge import run_r_script
 
 R_SCRIPT_TEMPLATE = r"""
 suppressPackageStartupMessages({

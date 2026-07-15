@@ -19,7 +19,7 @@ The Python scaffold is in `src/pyena/` and tests are in `tests/`.
 Create a Python package that lets researchers and web services perform Epistemic Network Analysis without invoking R at runtime. The package should support a high-level workflow similar to rENA:
 
 ```python
-from pyena import ena, accumulate, model
+from ena_python import ena, accumulate, model
 
 set_ = ena(
     data=df,

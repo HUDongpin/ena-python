@@ -5,8 +5,15 @@ import json
 import pandas as pd
 import pytest
 
-from pyena import accumulate, make_set
-from pyena.plotting import add_group, add_network, add_nodes, add_points, ena_plot, with_trajectory
+from ena_python import accumulate, make_set
+from ena_python.plotting import (
+    add_group,
+    add_network,
+    add_nodes,
+    add_points,
+    ena_plot,
+    with_trajectory,
+)
 
 
 def sample_df() -> pd.DataFrame:
@@ -66,7 +73,7 @@ def test_fastapi_endpoints_return_json() -> None:
     pytest.importorskip("plotly")
     from fastapi.testclient import TestClient
 
-    from pyena.web.api import create_app
+    from ena_python.web.api import create_app
 
     client = TestClient(create_app())
     payload = sample_payload()
@@ -93,9 +100,9 @@ def test_importing_web_api_does_not_build_app() -> None:
 
     import importlib
 
-    module = importlib.import_module("pyena.web.api")
+    module = importlib.import_module("ena_python.web.api")
     importlib.reload(module)
-    assert module._app is None, "importing pyena.web.api constructed the FastAPI app"
+    assert module._app is None, "importing ena_python.web.api constructed the FastAPI app"
 
     with pytest.raises(AttributeError):
         _ = module.does_not_exist
@@ -107,7 +114,7 @@ def test_web_requests_over_row_limit_are_rejected() -> None:
     pytest.importorskip("fastapi")
     from fastapi.testclient import TestClient
 
-    from pyena.web.api import create_app
+    from ena_python.web.api import create_app
 
     client = TestClient(create_app(max_rows=4))
     payload = sample_payload()  # 8 rows, above the limit of 4
@@ -123,7 +130,7 @@ def test_web_requests_over_row_limit_are_rejected() -> None:
 
 
 def test_max_rows_env_override() -> None:
-    from pyena.web.api import DEFAULT_MAX_ROWS, _resolve_max_rows
+    from ena_python.web.api import DEFAULT_MAX_ROWS, _resolve_max_rows
 
     assert _resolve_max_rows(None) == DEFAULT_MAX_ROWS
     assert _resolve_max_rows(7) == 7
@@ -146,7 +153,7 @@ def test_plot_labels_are_escaped() -> None:
     """
 
     pytest.importorskip("plotly")
-    from pyena.plotting import escape_label
+    from ena_python.plotting import escape_label
 
     assert escape_label("<img src=x onerror=alert(1)>") == "&lt;img src=x onerror=alert(1)&gt;"
     assert escape_label("plain unit") == "plain unit"

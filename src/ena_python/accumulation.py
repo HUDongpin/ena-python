@@ -9,10 +9,10 @@ from typing import Any
 import numpy as np
 import pandas as pd
 
-from pyena.exceptions import ValidationError
-from pyena.matrix import adjacency_names, ref_window_matrix, rows_to_co_occurrences
-from pyena.models import ENAData
-from pyena.types import ModelType, WindowType
+from ena_python.exceptions import ValidationError
+from ena_python.matrix import adjacency_names, ref_window_matrix, rows_to_co_occurrences
+from ena_python.models import ENAData
+from ena_python.types import ModelType, WindowType
 
 _MODEL_ALIASES: dict[str, ModelType] = {
     "E": "EndPoint",

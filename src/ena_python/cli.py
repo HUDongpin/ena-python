@@ -10,12 +10,12 @@ from typing import Any
 import pandas as pd
 from pandas.errors import EmptyDataError
 
-from pyena import __version__
-from pyena.accumulation import accumulate_data
-from pyena.api import ena
-from pyena.exceptions import PyENAError
-from pyena.io import read_table
-from pyena.modeling import make_set
+from ena_python import __version__
+from ena_python.accumulation import accumulate_data
+from ena_python.api import ena
+from ena_python.exceptions import PyENAError
+from ena_python.io import read_table
+from ena_python.modeling import make_set
 
 MAX_COLUMNS_IN_ERROR = 30
 PREVIEW_ROWS = 5
@@ -160,7 +160,7 @@ def _run_plot(args: argparse.Namespace) -> int:
     output = _validate_output_path(args.output)
     df = _load_and_validate(args)
     try:
-        from pyena.plotting import add_network, add_nodes, add_points, ena_plot
+        from ena_python.plotting import add_network, add_nodes, add_points, ena_plot
 
         set_ = ena(df, dimensions=args.dimensions, **_accumulation_kwargs(args))
         fig = ena_plot(set_)

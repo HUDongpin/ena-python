@@ -13,7 +13,7 @@ format:
 	ruff format .
 
 typecheck:
-	mypy src/pyena
+	mypy src/ena_python
 
 all: lint typecheck test
 

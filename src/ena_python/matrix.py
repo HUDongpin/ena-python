@@ -6,7 +6,7 @@ from math import isinf
 import numpy as np
 import pandas as pd
 
-from pyena.exceptions import ValidationError
+from ena_python.exceptions import ValidationError
 
 
 def adjacency_pairs(n_codes: int) -> list[tuple[int, int]]:

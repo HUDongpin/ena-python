@@ -6,7 +6,7 @@ from typing import Any
 import numpy as np
 import pandas as pd
 
-from pyena.models import ENARotationSet
+from ena_python.models import ENARotationSet
 
 
 def center(

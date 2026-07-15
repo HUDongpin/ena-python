@@ -1,17 +1,22 @@
 """pyENA: Python tools for Epistemic Network Analysis."""
 
-from pyena.accumulation import (
+from ena_python.accumulation import (
     accumulate,
     accumulate_data,
     ena_accumulate_data,
     ena_accumulate_data_file,
 )
-from pyena.api import ena
-from pyena.matrix import connection_matrix, names_to_adjacency_key
-from pyena.modeling import ena_make_set, make_set, model
-from pyena.models import ENAData, ENARotationSet, ENASet
-from pyena.normalize import fun_skip_sphere_norm, fun_sphere_norm, skip_sphere_norm, sphere_norm
-from pyena.plotting import (
+from ena_python.api import ena
+from ena_python.matrix import connection_matrix, names_to_adjacency_key
+from ena_python.modeling import ena_make_set, make_set, model
+from ena_python.models import ENAData, ENARotationSet, ENASet
+from ena_python.normalize import (
+    fun_skip_sphere_norm,
+    fun_sphere_norm,
+    skip_sphere_norm,
+    sphere_norm,
+)
+from ena_python.plotting import (
     add_group,
     add_network,
     add_nodes,
@@ -21,7 +26,7 @@ from pyena.plotting import (
     plot_points,
     with_trajectory,
 )
-from pyena.rotation import (
+from ena_python.rotation import (
     center,
     ena_rotate_by_generalized,
     ena_rotate_by_hena_regression,
@@ -39,7 +44,7 @@ from pyena.rotation import (
     rotation_h,
     svd_rotation,
 )
-from pyena.stats import cohens_d, ena_correlation, ena_correlations
+from ena_python.stats import cohens_d, ena_correlation, ena_correlations
 
 __all__ = [
     "ENAData",

@@ -7,7 +7,7 @@ import numpy as np
 import pandas as pd
 from scipy import stats as scipy_stats
 
-from pyena.models import ENASet
+from ena_python.models import ENASet
 
 
 def cohens_d(

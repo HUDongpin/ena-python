@@ -26,7 +26,7 @@ jobs:
       - name: Format
         run: ruff format --check .
       - name: Test
-        run: pytest --cov=pyena --cov-report=term-missing
+        run: pytest --cov=ena_python --cov-report=term-missing
 
   # Typecheck runs once, not per matrix entry. numpy's stubs describe array shapes
   # differently across releases (2.2 infers ndarray[tuple[int, int]] where 2.5 does
@@ -47,7 +47,7 @@ jobs:
           python -m pip install -U pip
           python -m pip install -e ".[dev,plot,web]"
       - name: Typecheck
-        run: mypy src/pyena
+        run: mypy src/ena_python
 
   build:
     runs-on: ubuntu-latest
@@ -69,7 +69,7 @@ jobs:
           python -m venv /tmp/fresh
           /tmp/fresh/bin/python -m pip install -q dist/*.whl
           cd /tmp
-          /tmp/fresh/bin/python -c "import pyena; print('pyena', pyena.__version__)"
+          /tmp/fresh/bin/python -c "import ena_python; print('ena_python', ena_python.__version__)"
           /tmp/fresh/bin/pyena version
       - uses: actions/upload-artifact@v4
         with:

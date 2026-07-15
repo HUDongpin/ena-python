@@ -5,7 +5,7 @@ import json
 import pandas as pd
 import pytest
 
-from pyena import accumulate, ena, ena_accumulate_data_file
+from ena_python import accumulate, ena, ena_accumulate_data_file
 
 
 def sample_df() -> pd.DataFrame:
@@ -79,7 +79,7 @@ def test_conversation_window_counts_each_unit_conversation_once() -> None:
 
 
 def test_ena_accumulate_data_accepts_separate_rena_frames() -> None:
-    from pyena.accumulation import ena_accumulate_data
+    from ena_python.accumulation import ena_accumulate_data
 
     units = pd.DataFrame({"unit": ["u1", "u1", "u2"]})
     conversation = pd.DataFrame({"conversation": ["c1", "c1", "c1"]})
@@ -109,7 +109,7 @@ def test_ena_accumulate_data_accepts_separate_rena_frames() -> None:
 def test_stable_metadata_does_not_warn(recwarn) -> None:
     """Only *dropped* columns warn; a well-formed call must stay quiet."""
 
-    from pyena.accumulation import ena_accumulate_data
+    from ena_python.accumulation import ena_accumulate_data
 
     df = pd.DataFrame(
         {

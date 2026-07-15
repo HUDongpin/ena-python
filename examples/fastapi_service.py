@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import uvicorn
 
-from pyena.web.api import create_app
+from ena_python.web.api import create_app
 
 app = create_app()
 

@@ -32,7 +32,7 @@ def run_cli(*args: str) -> subprocess.CompletedProcess[str]:
     env = os.environ.copy()
     env["PYTHONPATH"] = f"{ROOT / 'src'}{os.pathsep}{env.get('PYTHONPATH', '')}"
     return subprocess.run(
-        [sys.executable, "-m", "pyena.cli", *args],
+        [sys.executable, "-m", "ena_python.cli", *args],
         cwd=ROOT,
         env=env,
         text=True,

@@ -3,8 +3,8 @@ from __future__ import annotations
 import argparse
 import time
 
-from pyena import accumulate
-from pyena.io import read_table
+from ena_python import accumulate
+from ena_python.io import read_table
 
 
 def main() -> None:

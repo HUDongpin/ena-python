@@ -30,15 +30,15 @@ ls -lh dist
 
 Expected outputs:
 
-- `dist/pyena-<version>-py3-none-any.whl`
-- `dist/pyena-<version>.tar.gz`
+- `dist/ena_python-<version>-py3-none-any.whl`
+- `dist/ena_python-<version>.tar.gz`
 
 ## 4. Smoke Test A Fresh Install
 
 ```bash
 tmpdir=$(mktemp -d /tmp/pyena-wheel-smoke.XXXXXX)
 python -m venv "$tmpdir/venv"
-"$tmpdir/venv/bin/python" -m pip install dist/pyena-*.whl
+"$tmpdir/venv/bin/python" -m pip install dist/ena_python-*.whl
 "$tmpdir/venv/bin/pyena" --help
 "$tmpdir/venv/bin/pyena" ena examples/cli_sample.csv \
   --units unit \
@@ -64,7 +64,7 @@ Core installs do not include Plotly. A core-only install should show a clear plo
 Install plot support when plot output is needed:
 
 ```bash
-"$tmpdir/venv/bin/python" -m pip install "dist/pyena-<version>-py3-none-any.whl[plot]"
+"$tmpdir/venv/bin/python" -m pip install "dist/ena_python-<version>-py3-none-any.whl[plot]"
 "$tmpdir/venv/bin/pyena" plot examples/cli_sample.csv \
   --units unit \
   --conversation conv \

@@ -3,7 +3,7 @@ from __future__ import annotations
 import numpy as np
 import pandas as pd
 
-from pyena.matrix import (
+from ena_python.matrix import (
     adjacency_names,
     connection_matrix,
     ref_window_matrix,

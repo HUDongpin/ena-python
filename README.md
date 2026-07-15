@@ -1,36 +1,50 @@
-# pyENA
+# ena-python
 
-[![CI](https://github.com/HUDongpin/pyENA/actions/workflows/ci.yml/badge.svg)](https://github.com/HUDongpin/pyENA/actions/workflows/ci.yml)
+[![CI](https://github.com/HUDongpin/ena-python/actions/workflows/ci.yml/badge.svg)](https://github.com/HUDongpin/ena-python/actions/workflows/ci.yml)
+[![PyPI](https://img.shields.io/pypi/v/ena-python)](https://pypi.org/project/ena-python/)
 [![Python](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12%20%7C%203.13-blue)](https://www.python.org/)
 [![License](https://img.shields.io/badge/license-GPL--3.0--only-blue)](LICENSE)
 
-**pyENA** is a Python implementation of [Epistemic Network Analysis](https://www.epistemicnetwork.org/), ported from the R package [rENA](https://gitlab.com/epistemic-analytics/qe-packages/rENA).
+**ena-python** is a Python implementation of [Epistemic Network Analysis](https://www.epistemicnetwork.org/), ported from the R package [rENA](https://gitlab.com/epistemic-analytics/qe-packages/rENA).
 
-It is a standalone library: `import pyena` needs only NumPy, pandas, and SciPy. No R, no Node, no server, and no network access. That keeps it usable in a notebook, in a script, or in browser Python (Pyodide).
+> Formerly **pyENA**. Renamed because an unrelated package already owns `pyena` on PyPI — including the `pyena` module name — so keeping it would have collided for anyone who installed both. The command-line tool is still `pyena`.
+
+It is a standalone library: `import ena_python` needs only NumPy, pandas, and SciPy. No R, no Node, no server, and no network access. That keeps it usable in a notebook, in a script, or in browser Python (Pyodide).
 
 > **Status: early release (0.1.0).** The core pipeline — accumulation, the moving-stanza window, normalization, centering, SVD projection, node positioning, and mean rotation — is checked numerically against real rENA 0.3.1. Other parts are not; see [Parity with rENA](#parity-with-rena) for exactly which. The API may still change.
 
 ## Install
 
 ```bash
-pip install git+https://github.com/HUDongpin/pyENA
+pip install ena-python
 ```
 
-pyENA is not on PyPI: the `pyena` name is already taken by an unrelated project.
+```python
+import ena_python
+```
+
+The distribution is `ena-python`, the module is `ena_python`, and the command-line
+tool is `pyena` (that name is free — the other package ships no console script).
 
 Optional extras:
 
 ```bash
-pip install "pyENA[plot] @ git+https://github.com/HUDongpin/pyENA"    # Plotly figures
-pip install "pyENA[web] @ git+https://github.com/HUDongpin/pyENA"     # FastAPI service
-pip install "pyENA[parquet] @ git+https://github.com/HUDongpin/pyENA" # .parquet input
+pip install "ena-python[plot]"     # Plotly figures
+pip install "ena-python[web]"      # FastAPI service
+pip install "ena-python[parquet]"  # .parquet input
+```
+
+Or from source:
+
+```bash
+pip install git+https://github.com/HUDongpin/ena-python
 ```
 
 ## Quick start
 
 ```python
 import pandas as pd
-from pyena import ena
+from ena_python import ena
 
 rows = pd.DataFrame(
     {
@@ -57,7 +71,7 @@ print(set_.variance)    # variance explained, per dimension
 ### Step by step
 
 ```python
-from pyena import accumulate, make_set
+from ena_python import accumulate, make_set
 
 data = accumulate(
     rows,
@@ -100,7 +114,7 @@ Metadata must be constant within a unit. A metadata column that varies inside a 
 ## Plotting and serving
 
 ```python
-from pyena.plotting import add_network, add_nodes, add_points, ena_plot
+from ena_python.plotting import add_network, add_nodes, add_points, ena_plot
 
 fig = ena_plot(set_)
 add_network(fig)
@@ -110,7 +124,7 @@ fig.to_json()
 ```
 
 ```bash
-uvicorn pyena.web.api:app --reload   # /accumulate, /model, /ena, /plot
+uvicorn ena_python.web.api:app --reload   # /accumulate, /model, /ena, /plot
 ```
 
 The web app is for **localhost/trusted use**: no authentication, and a row cap
@@ -128,7 +142,7 @@ pyena ena examples/cli_sample.csv \
   --output ena.json
 ```
 
-Reads CSV, TSV, and Parquet (Parquet needs `pyENA[parquet]`). `--include-raw` echoes the input into the JSON. See [`docs/cli_usage.md`](docs/cli_usage.md).
+Reads CSV, TSV, and Parquet (Parquet needs `ena-python[parquet]`). `--include-raw` echoes the input into the JSON. See [`docs/cli_usage.md`](docs/cli_usage.md).
 
 ## Parity with rENA
 
@@ -152,7 +166,7 @@ See [`docs/testing_strategy.md`](docs/testing_strategy.md) and [`reference/READM
 
 ## Issues found in rENA 0.3.1
 
-Porting turned up five places where rENA 0.3.1 behaves differently from what its own code, comments, or docs intend. They are written up with reproducible snippets in **[`docs/rena-upstream-issues.md`](docs/rena-upstream-issues.md)**, and tracked here under the [`upstream-rena`](https://github.com/HUDongpin/pyENA/issues?q=label%3Aupstream-rena) label.
+Porting turned up five places where rENA 0.3.1 behaves differently from what its own code, comments, or docs intend. They are written up with reproducible snippets in **[`docs/rena-upstream-issues.md`](docs/rena-upstream-issues.md)**, and tracked here under the [`upstream-rena`](https://github.com/HUDongpin/ena-python/issues?q=label%3Aupstream-rena) label.
 
 | # | Issue | Severity | pyENA |
 |---|---|---|---|
@@ -177,7 +191,7 @@ pytest
 ```
 
 ```bash
-ruff check . && ruff format --check . && mypy src/pyena && pytest
+ruff check . && ruff format --check . && mypy src/ena_python && pytest
 ```
 
 Regenerating fixtures needs R with rENA installed (`install.packages("rENA")`) — see [`reference/README.md`](reference/README.md). Everyday development does not need R.

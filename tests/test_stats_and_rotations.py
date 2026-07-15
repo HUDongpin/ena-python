@@ -3,14 +3,14 @@ from __future__ import annotations
 import numpy as np
 import pandas as pd
 
-from pyena import accumulate, make_set
-from pyena.rotation import (
+from ena_python import accumulate, make_set
+from ena_python.rotation import (
     rotate_by_generalized,
     rotate_by_regression,
     rotate_by_regression_2,
     rotation_h,
 )
-from pyena.stats import cohens_d, ena_correlation, ena_correlations
+from ena_python.stats import cohens_d, ena_correlation, ena_correlations
 
 
 def sample_rotation_df() -> pd.DataFrame:

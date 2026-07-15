@@ -6,11 +6,11 @@ from typing import Any
 import numpy as np
 import pandas as pd
 
-from pyena.accumulation import accumulate_data
-from pyena.modeling import make_set
-from pyena.models import ENASet
-from pyena.normalize import sphere_norm
-from pyena.rotation import svd_rotation
+from ena_python.accumulation import accumulate_data
+from ena_python.modeling import make_set
+from ena_python.models import ENASet
+from ena_python.normalize import sphere_norm
+from ena_python.rotation import svd_rotation
 
 
 def ena(

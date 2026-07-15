@@ -7,7 +7,7 @@ The `pyena` command is an internal alpha command-line interface for running the 
 ```bash
 python -m pip install -e ".[dev,plot,web]"
 python -m build
-python -m pip install dist/pyena-*.whl
+python -m pip install dist/ena_python-*.whl
 pyena --help
 ```
 
@@ -66,9 +66,9 @@ If `plot` is run without `--output`, it prints Plotly figure JSON to stdout.
 Plot commands require the plot extra:
 
 ```bash
-python -m pip install "pyENA[plot]"
+python -m pip install "ena-python[plot]"
 # or, for a local wheel:
-python -m pip install "$(ls dist/pyena-*-py3-none-any.whl)[plot]"
+python -m pip install "$(ls dist/ena_python-*-py3-none-any.whl)[plot]"
 ```
 
 ## Real CSV Acceptance

@@ -8,7 +8,7 @@ import time
 from pathlib import Path
 from typing import Any
 
-from pyena.io import read_table
+from ena_python.io import read_table
 
 DEFAULT_OUTPUT_DIR = Path("data/local/pyena_cli_acceptance")
 
@@ -81,7 +81,7 @@ def _run_pyena(command: str, args: argparse.Namespace, output: Path) -> dict[str
     command_args = [
         sys.executable,
         "-m",
-        "pyena.cli",
+        "ena_python.cli",
         command,
         args.input,
         *_schema_args(args),

@@ -18,12 +18,12 @@ from typing import Any
 
 import pandas as pd
 
-from pyena import __version__
-from pyena.accumulation import accumulate_data
-from pyena.api import ena
-from pyena.modeling import make_set
-from pyena.models import ENAData
-from pyena.plotting import add_network, add_nodes, add_points, ena_plot
+from ena_python import __version__
+from ena_python.accumulation import accumulate_data
+from ena_python.api import ena
+from ena_python.modeling import make_set
+from ena_python.models import ENAData
+from ena_python.plotting import add_network, add_nodes, add_points, ena_plot
 
 DEFAULT_MAX_ROWS = 100_000
 """Rows accepted per request unless overridden.
@@ -146,7 +146,7 @@ _app: Any = None
 def __getattr__(name: str) -> Any:
     """Build the module-level `app` on first access rather than at import.
 
-    `uvicorn pyena.web.api:app` still works, because uvicorn resolves the
+    `uvicorn ena_python.web.api:app` still works, because uvicorn resolves the
     attribute. But merely importing this module -- which a test collector or a
     documentation tool may do -- no longer constructs a FastAPI instance, and no
     longer hard-requires the [web] extra to be installed.

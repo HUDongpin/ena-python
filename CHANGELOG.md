@@ -1,9 +1,31 @@
 # Changelog
 
-All notable changes to pyENA are documented here.
+All notable changes to ena-python (formerly pyENA) are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versioning is [SemVer](https://semver.org/).
 
 ## [Unreleased]
+
+### Changed — project, distribution, and import names (breaking)
+
+The project, the GitHub repository, and the PyPI distribution are now **ena-python**;
+the module is **`ena_python`**. It was pyENA. The CLI command is still `pyena`.
+
+```python
+pip install ena-python
+import ena_python
+```
+
+The rename was forced by an unrelated package that already owns `pyena` on PyPI — and
+that installs a top-level module named `pyena` as well. Shipping our own `pyena` module would have
+collided with it silently: two Python ENA ports are exactly the pair someone would
+install together to compare, and whichever landed second would win. The distribution
+name follows the module name for consistency.
+
+`import ena_python` rather than `import ena`, despite `ena` being unclaimed, because
+the package exports a top-level function named `ena` — `from ena import ena` reads
+badly. Done now while there is no installed base; it only gets more expensive later.
+
+### Parity
 
 Closes the parity gaps 0.1.0 shipped with: trajectory models, the Conversation
 window, and the four advanced rotations are now pinned to real compiled rENA 0.3.1
@@ -127,4 +149,4 @@ wrong on data of rank > `dimensions`, so results from 0.0.1 should be regenerate
   FastAPI instance — or raises when the `[web]` extra is absent.
 - Not published to PyPI: the `pyena` name belongs to an unrelated project.
 
-[0.1.0]: https://github.com/HUDongpin/pyENA/releases/tag/v0.1.0
+[0.1.0]: https://github.com/HUDongpin/ena-python/releases/tag/v0.1.0

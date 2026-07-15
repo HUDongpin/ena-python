@@ -4,7 +4,7 @@ Notes recorded while porting [rENA](https://gitlab.com/epistemic-analytics/qe-pa
 
 This exists for two reasons: so pyENA users understand why a given result may not match rENA, and so the findings are in a form the rENA maintainers can check and act on if they wish.
 
-Each is also tracked as an issue under the [`upstream-rena`](https://github.com/HUDongpin/pyENA/issues?q=label%3Aupstream-rena) label: [#1](https://github.com/HUDongpin/pyENA/issues/1), [#2](https://github.com/HUDongpin/pyENA/issues/2), [#3](https://github.com/HUDongpin/pyENA/issues/3), [#4](https://github.com/HUDongpin/pyENA/issues/4), [#5](https://github.com/HUDongpin/pyENA/issues/5). Those are **not** pyENA bugs; they live on this tracker because they came out of this port.
+Each is also tracked as an issue under the [`upstream-rena`](https://github.com/HUDongpin/ena-python/issues?q=label%3Aupstream-rena) label: [#1](https://github.com/HUDongpin/ena-python/issues/1), [#2](https://github.com/HUDongpin/ena-python/issues/2), [#3](https://github.com/HUDongpin/ena-python/issues/3), [#4](https://github.com/HUDongpin/ena-python/issues/4), [#5](https://github.com/HUDongpin/ena-python/issues/5). Those are **not** pyENA bugs; they live on this tracker because they came out of this port.
 
 **Scope and caveats**
 
@@ -44,7 +44,7 @@ rot <- function(r) as.matrix(r$rotation)
 
 ## 1. `ena.rotate.by.hena.regression` does not deflate the y axis
 
-Tracked as [#1](https://github.com/HUDongpin/pyENA/issues/1).
+Tracked as [#1](https://github.com/HUDongpin/ena-python/issues/1).
 
 **Severity: high — affects returned coordinates.**
 
@@ -110,7 +110,7 @@ Note that the *subsequent* deflation on line 130 (`defA <- defA - defA %*% v2 %*
 
 ## 2. Regression axes are named after the first edge, not the predictor
 
-Tracked as [#2](https://github.com/HUDongpin/pyENA/issues/2).
+Tracked as [#2](https://github.com/HUDongpin/ena-python/issues/2).
 
 **Severity: low — cosmetic, but produces duplicate column names.**
 
@@ -142,7 +142,7 @@ all.vars(as.formula("V ~ score"))   # "V" "score"
 
 ## 3. The documented `x_var` form raises an error
 
-Tracked as [#3](https://github.com/HUDongpin/pyENA/issues/3).
+Tracked as [#3](https://github.com/HUDongpin/ena-python/issues/3).
 
 **Severity: low — documentation/code mismatch.**
 
@@ -170,7 +170,7 @@ ena.rotate.by.hena.regression(set, list(x_var = "V ~ score"))
 
 ## 4. `ena.rotate.by.hena.regression_2` errors cryptically on rank-deficient input
 
-Tracked as [#4](https://github.com/HUDongpin/pyENA/issues/4).
+Tracked as [#4](https://github.com/HUDongpin/ena-python/issues/4).
 
 **Severity: low — diagnostics.**
 
@@ -192,7 +192,7 @@ With 7+ units and the same 4 codes it succeeds. The underlying situation is legi
 
 ## 5. `ena.rotation.h` emits a `data.table` warning on every call
 
-Tracked as [#5](https://github.com/HUDongpin/pyENA/issues/5).
+Tracked as [#5](https://github.com/HUDongpin/ena-python/issues/5).
 
 **Severity: trivial — noise.**
 

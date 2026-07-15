@@ -3,7 +3,7 @@ from __future__ import annotations
 import numpy as np
 import pandas as pd
 
-from pyena.normalize import skip_sphere_norm, sphere_norm
+from ena_python.normalize import skip_sphere_norm, sphere_norm
 
 
 def test_sphere_norm_zero_rows_remain_zero() -> None:

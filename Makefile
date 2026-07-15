@@ -18,4 +18,4 @@ typecheck:
 all: lint typecheck test
 
 benchmark:
-	pytest -m benchmark --benchmark-only
+	pytest -m benchmark

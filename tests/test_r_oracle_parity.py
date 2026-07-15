@@ -320,10 +320,61 @@ def test_rotate_by_mean_matches_r_oracle_fixture() -> None:
     )
     expected = fixture["mean_model"]
 
-    expected_rotation = _frame(expected["rotation_matrix"], ["codes", "MR1", "SVD2"])
-    actual_rotation = got.rotation.rotation.reset_index(names="codes")[["codes", "MR1", "SVD2"]]
-    actual_rotation = _sign_align(actual_rotation, expected_rotation, ["SVD2"])
+    # The whole rotation, not just the retained dimensions. `MR1` is the group-mean
+    # difference and `SVD2`/`SVD3` complete the basis via orthogonal_svd; checking only
+    # MR1/SVD2 left that completion unverified, which is where a deflation or basis
+    # ordering error would hide.
+    expected_rotation = _frame(expected["rotation_matrix"])
+    dims = [col for col in expected_rotation.columns if col != "codes"]
+    assert dims == ["MR1", "SVD2", "SVD3"], f"unexpected rENA mean-rotation basis: {dims}"
+
+    actual_rotation = got.rotation.full_rotation.reset_index(names="codes")[["codes", *dims]]
+    assert list(got.rotation.rotation.columns) == ["MR1", "SVD2"], (
+        "the retained rotation should still be sliced to `dimensions`"
+    )
+
+    # Every column matches rENA outright, with no sign alignment at all. MR1's sign is
+    # not the group-mean direction (see test_mean_rotation_ignores_group_order) but
+    # numpy's QR convention, which happens to agree with R's; the SVD columns follow
+    # from the same deflated basis. Asserting unaligned is the stronger check, and it
+    # holds -- if a future LAPACK flips one, align that column and say so here.
     _assert_frame_close(actual_rotation, expected_rotation, atol=1e-7)
+
+    # The rotation must stay an orthonormal basis.
+    matrix = got.rotation.full_rotation.to_numpy(dtype=float)
+    np.testing.assert_allclose(matrix.T @ matrix, np.eye(matrix.shape[1]), atol=1e-9)
+
+    # Everything downstream of the rotation, which was previously unchecked. This
+    # model's variance has a real third component (~4.5%), so it also discriminates the
+    # F-1 denominator independently of the rank3 fixture.
+    expected_variance = np.asarray(expected["variance"], dtype=float)
+    assert expected_variance[2] > 1e-3, "mean_model should carry real variance beyond dim 2"
+    np.testing.assert_allclose(
+        got.variance.to_numpy(dtype=float), expected_variance, atol=1e-9, rtol=0
+    )
+    np.testing.assert_allclose(
+        got.rotation.center_vec, np.asarray(expected["center_vec"]), atol=1e-10, rtol=0
+    )
+
+    point_dims = ["MR1", "SVD2"]
+    expected_points = _frame(expected["points"], point_dims)
+    _assert_frame_close(
+        _sign_align(got.points[point_dims], expected_points, point_dims),
+        expected_points,
+        atol=1e-7,
+    )
+    expected_nodes = _frame(expected["nodes"], ["code", *point_dims])
+    _assert_frame_close(
+        _sign_align(got.nodes[["code", *point_dims]], expected_nodes, point_dims),
+        expected_nodes,
+        atol=1e-7,
+    )
+    expected_centroids = _frame(expected["centroids"], ["unit", *point_dims])
+    _assert_frame_close(
+        _sign_align(got.centroids[["unit", *point_dims]], expected_centroids, point_dims),
+        expected_centroids,
+        atol=1e-7,
+    )
 
 
 def test_rotation_set_reuse_matches_r_oracle_fixture() -> None:
@@ -652,3 +703,48 @@ def test_ena_correlations_rejects_dimensions_the_model_does_not_have() -> None:
         ena_correlations(model, dims=["SVD1", "SVD3"])
     with pytest.raises(ValidationError, match="dimensions=3"):
         ena_correlations(model, dims=["SVD1", "SVD3"])
+
+
+def test_mean_rotation_ignores_group_order() -> None:
+    """Swapping the two groups does not flip MR1 -- in ena-python or in rENA.
+
+    This is counter-intuitive: `rotation_params=[g1, g2]` looks like it should orient the
+    axis from g1 towards g2, so that positive coordinates mean "more like g2". It does
+    not. `orthogonal_svd` returns `qr_ortho(weights)[:, :k]` -- the Q of a QR
+    decomposition -- and QR fixes the sign of Q's columns regardless of the input
+    vector's sign. rENA does the same thing via `qr.Q(qr(A), complete = TRUE)`, and R and
+    numpy happen to share the convention, so both produce the identical MR1 either way.
+
+    Verified against rENA 0.3.1: MR1 is [-0.21626277, -0.93323058, 0.28689911] for both
+    (g1, g2) and (g2, g1).
+
+    The consequence for users is that the *direction* of a mean rotation is arbitrary:
+    read the group centroids to find which side is which, rather than assuming the sign.
+    A future change that made group order flip MR1 would be a divergence from rENA, so
+    this pins it.
+    """
+
+    fixture = _load_fixture()
+    accum = _toy_accumulation(fixture)
+    first = accum.meta_data["group"] == "g1"
+    second = accum.meta_data["group"] == "g2"
+
+    forward = make_set(
+        accum, dimensions=2, rotation_by=rotate_by_mean, rotation_params=[first, second]
+    )
+    reversed_ = make_set(
+        accum, dimensions=2, rotation_by=rotate_by_mean, rotation_params=[second, first]
+    )
+
+    np.testing.assert_allclose(
+        forward.rotation.rotation["MR1"].to_numpy(dtype=float),
+        reversed_.rotation.rotation["MR1"].to_numpy(dtype=float),
+        atol=1e-12,
+        rtol=0,
+        err_msg="group order changed MR1; rENA ignores it, so this now diverges",
+    )
+    # ...and it is rENA's value in both directions, not merely self-consistent.
+    expected = _frame(fixture["mean_model"]["rotation_matrix"])["MR1"].to_numpy(dtype=float)
+    np.testing.assert_allclose(
+        reversed_.rotation.rotation["MR1"].to_numpy(dtype=float), expected, atol=1e-7, rtol=0
+    )

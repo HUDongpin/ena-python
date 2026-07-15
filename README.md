@@ -111,6 +111,8 @@ Metadata must be constant within a unit. A metadata column that varies inside a 
 
 **SVD signs are not canonical.** As in any SVD, an axis may be mirrored relative to rENA or across platforms. Compare sign-aligned (see `_sign_align` in `tests/test_r_oracle_parity.py`).
 
+**A mean rotation's direction is arbitrary too.** Passing `rotation_params=[g1, g2]` does *not* orient the axis from `g1` toward `g2` — swapping them yields an identical `MR1`, because the mean difference goes through a QR decomposition whose sign convention ignores the input's sign. rENA does the same. Read the group centroids to see which side is which rather than trusting the sign.
+
 ## Plotting and serving
 
 ```python

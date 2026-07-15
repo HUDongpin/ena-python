@@ -273,6 +273,16 @@ def rotate_by_mean(
     of such pairs. The first rotation dimension for each pair is the normalized
     difference between group means; remaining dimensions are filled by SVD of
     the deflated data.
+
+    **The order of the two groups does not orient the axis.** `[g1, g2]` and `[g2, g1]`
+    produce an identical `MR1`, not mirrored ones. The mean difference is passed through
+    `orthogonal_svd`, which returns the `Q` of a QR decomposition, and QR fixes the sign
+    of its columns independently of the input's sign. rENA behaves the same way (it uses
+    `qr.Q(qr(A), complete = TRUE)`, and R shares numpy's convention), so this is parity
+    rather than a port artifact -- verified against rENA 0.3.1.
+
+    In practice: do not read "positive MR1" as "more like the second group". Check the
+    group centroids to see which side is which.
     """
 
     arr = (

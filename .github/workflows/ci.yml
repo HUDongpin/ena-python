@@ -49,6 +49,24 @@ jobs:
       - name: Typecheck
         run: mypy src/ena_python
 
+  # The ratio-based complexity guards run in the matrix above, since they are
+  # host-independent. These are the wall-clock measurements: budgets set ~20-30x above
+  # a real laptop timing, so they only fire on a catastrophic regression and cannot
+  # flake on a noisy shared runner.
+  benchmark:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install
+        run: |
+          python -m pip install -U pip
+          python -m pip install -e ".[dev]"
+      - name: Benchmark
+        run: pytest -m benchmark
+
   build:
     runs-on: ubuntu-latest
     steps:

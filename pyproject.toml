@@ -85,7 +85,9 @@ exclude = [
 
 [tool.pytest.ini_options]
 minversion = "8.0"
-addopts = "-q --strict-markers --strict-config"
+# Benchmarks are timing-sensitive and slower than the unit tests, so they stay out
+# of the default run; `make benchmark` (or -m benchmark) opts back in.
+addopts = "-q --strict-markers --strict-config -m 'not benchmark'"
 testpaths = ["tests"]
 markers = [
   "rcompat: requires R and the rENA reference package",

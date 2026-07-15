@@ -25,10 +25,29 @@ jobs:
         run: ruff check .
       - name: Format
         run: ruff format --check .
-      - name: Typecheck
-        run: mypy src/pyena
       - name: Test
         run: pytest --cov=pyena --cov-report=term-missing
+
+  # Typecheck runs once, not per matrix entry. numpy's stubs describe array shapes
+  # differently across releases (2.2 infers ndarray[tuple[int, int]] where 2.5 does
+  # not), and pip resolves a different numpy per Python version, so the same source
+  # yields different mypy output per job. Those differences are stub artifacts, not
+  # defects, and pinning `python_version` is not a fix either: it makes mypy parse
+  # numpy >= 2.2's PEP 695 stubs under older syntax rules and fail outright. The
+  # runtime matrix above still exercises 3.10-3.13.
+  typecheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install
+        run: |
+          python -m pip install -U pip
+          python -m pip install -e ".[dev,plot,web]"
+      - name: Typecheck
+        run: mypy src/pyena
 
   build:
     runs-on: ubuntu-latest

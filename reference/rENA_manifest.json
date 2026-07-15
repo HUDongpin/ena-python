@@ -1,0 +1,955 @@
+{
+  "created_at": "2026-05-26T09:36:40.041120Z",
+  "source_archive": "rENA-main(4).zip",
+  "exports": [
+    "ENARotationSet",
+    "ENAdata",
+    "ENAplot",
+    "ENAset",
+    "accumulate",
+    "add_group",
+    "add_network",
+    "add_nodes",
+    "add_points",
+    "add_trajectory",
+    "as.ena.co.occurrence",
+    "as.ena.matrix",
+    "as.ena.metadata",
+    "as.qe.code",
+    "as.qe.data",
+    "as.qe.horizon",
+    "as.qe.metadata",
+    "as.qe.unit",
+    "as_trajectory",
+    "center",
+    "check_range",
+    "clear",
+    "codes",
+    "combn_c2",
+    "connection.matrix",
+    "define",
+    "directed_node_positions",
+    "directed_node_positions_with_ground_response_added",
+    "ena",
+    "ena.accumulate.data",
+    "ena.conversations",
+    "ena.correlations",
+    "ena.group",
+    "ena.make.set",
+    "ena.plot",
+    "ena.plot.group",
+    "ena.plot.network",
+    "ena.plot.points",
+    "ena.plot.trajectory",
+    "ena.plotter",
+    "ena.rotate.by.generalized",
+    "ena.rotate.by.hena.regression",
+    "ena.rotate.by.hena.regression_2",
+    "ena.rotate.by.mean",
+    "ena.rotation.h",
+    "ena.svd",
+    "ena.writeup",
+    "ena_correlation",
+    "find_binary_cols",
+    "find_code_cols",
+    "find_dimension_cols",
+    "find_meta_cols",
+    "fun_cohens.d",
+    "fun_skip_sphere_norm",
+    "fun_sphere_norm",
+    "get_x1_main_effect",
+    "gmr",
+    "group",
+    "horizon",
+    "is.qe.code",
+    "is.qe.data",
+    "is.qe.horizon",
+    "is.qe.metadata",
+    "is.qe.unit",
+    "means_rotate",
+    "merge_columns_c",
+    "metadata",
+    "methods_report",
+    "methods_report_stream",
+    "model",
+    "move_nodes_to_unit_circle",
+    "move_nodes_to_unit_circle_with_equal_space",
+    "namesToAdjacencyKey",
+    "optimize",
+    "project",
+    "project_in",
+    "reclassify",
+    "remove_meta_data",
+    "rotate",
+    "show",
+    "sphere_norm",
+    "units",
+    "vector_to_ut",
+    "with_means",
+    "with_trajectory"
+  ],
+  "functions": [
+    {
+      "r_name": "combn_c2",
+      "python_name": "combn_c2",
+      "source_file": "R/RcppExports.R",
+      "arguments": "n",
+      "exported": true
+    },
+    {
+      "r_name": "ena_correlation",
+      "python_name": "ena_correlation",
+      "source_file": "R/RcppExports.R",
+      "arguments": "points, centroids, conf_level = 0.95",
+      "exported": true
+    },
+    {
+      "r_name": "merge_columns_c",
+      "python_name": "merge_columns_c",
+      "source_file": "R/RcppExports.R",
+      "arguments": "df, cols, sep = \"::\"",
+      "exported": true
+    },
+    {
+      "r_name": "vector_to_ut",
+      "python_name": "vector_to_ut",
+      "source_file": "R/RcppExports.R",
+      "arguments": "v",
+      "exported": true
+    },
+    {
+      "r_name": "svector_to_ut",
+      "python_name": "svector_to_ut",
+      "source_file": "R/RcppExports.R",
+      "arguments": "v",
+      "exported": false
+    },
+    {
+      "r_name": "rows_to_co_occurrences",
+      "python_name": "rows_to_co_occurrences",
+      "source_file": "R/RcppExports.R",
+      "arguments": "df, binary = TRUE",
+      "exported": false
+    },
+    {
+      "r_name": "ref_window_df",
+      "python_name": "ref_window_df",
+      "source_file": "R/RcppExports.R",
+      "arguments": "df, windowSize = 1, windowForward = 0, binary = TRUE",
+      "exported": false
+    },
+    {
+      "r_name": "ref_window_lag",
+      "python_name": "ref_window_lag",
+      "source_file": "R/RcppExports.R",
+      "arguments": "df, windowSize = 0L, binary = TRUE",
+      "exported": false
+    },
+    {
+      "r_name": "fun_sphere_norm",
+      "python_name": "fun_sphere_norm",
+      "source_file": "R/RcppExports.R",
+      "arguments": "dfM",
+      "exported": true
+    },
+    {
+      "r_name": "fun_skip_sphere_norm",
+      "python_name": "fun_skip_sphere_norm",
+      "source_file": "R/RcppExports.R",
+      "arguments": "dfM",
+      "exported": true
+    },
+    {
+      "r_name": "center_data_c",
+      "python_name": "center_data_c",
+      "source_file": "R/RcppExports.R",
+      "arguments": "values",
+      "exported": false
+    },
+    {
+      "r_name": "triIndices",
+      "python_name": "tri_indices",
+      "source_file": "R/RcppExports.R",
+      "arguments": "len, row = -1L",
+      "exported": false
+    },
+    {
+      "r_name": "lws_lsq_positions",
+      "python_name": "lws_lsq_positions",
+      "source_file": "R/RcppExports.R",
+      "arguments": "adjMats, t, numDims",
+      "exported": false
+    },
+    {
+      "r_name": "directed_node_positions",
+      "python_name": "directed_node_positions",
+      "source_file": "R/RcppExports.R",
+      "arguments": "line_weights, points, numDims",
+      "exported": true
+    },
+    {
+      "r_name": "directed_node_positions_with_ground_response_added",
+      "python_name": "directed_node_positions_with_ground_response_added",
+      "source_file": "R/RcppExports.R",
+      "arguments": "line_weights, points, numDims",
+      "exported": true
+    },
+    {
+      "r_name": "accumulate.data",
+      "python_name": "accumulate_data",
+      "source_file": "R/accumulate.data.R",
+      "arguments": "enadata",
+      "exported": false
+    },
+    {
+      "r_name": "fun_cohens.d",
+      "python_name": "fun_cohens_d",
+      "source_file": "R/cohens.d.R",
+      "arguments": "x, y",
+      "exported": true
+    },
+    {
+      "r_name": "connection.matrix",
+      "python_name": "connection_matrix",
+      "source_file": "R/connection.matrix.R",
+      "arguments": "x",
+      "exported": true
+    },
+    {
+      "r_name": "ena",
+      "python_name": "ena",
+      "source_file": "R/ena.R",
+      "arguments": "data, codes, units, conversation, metadata = NULL, model = c(\"EndPoint\", \"AccumulatedTrajectory\", \"SeparateTrajectory\"), weight.by = \"binary\", window = c(\"MovingStanzaWindow\", \"Conversation\"), window.size.back = 1, include.meta = TRUE, groupVar = NULL, groups = NULL, runTest = FALSE, points = FALSE, mean = FALSE, network = TRUE, networkMultiplier = 1, subtractionMultiplier = 1, unit = NULL, include.plots = T, print.plots = F, ...",
+      "exported": true
+    },
+    {
+      "r_name": "ena.accumulate.data",
+      "python_name": "ena_accumulate_data",
+      "source_file": "R/ena.accumulate.data.R",
+      "arguments": "units = NULL, conversation = NULL, codes = NULL, metadata = NULL, model = c(\"EndPoint\", \"AccumulatedTrajectory\", \"SeparateTrajectory\"), weight.by = \"binary\", window = c(\"MovingStanzaWindow\", \"Conversation\"), window.size.back = 1, window.size.forward = 0, mask = NULL, include.meta = T, as.list = T, ...",
+      "exported": true
+    },
+    {
+      "r_name": "ena.accumulate.data.file",
+      "python_name": "ena_accumulate_data_file",
+      "source_file": "R/ena.accumulate.data.file.R",
+      "arguments": "file, units.used = NULL, conversations.used = NULL, units.by, conversations.by, codes = NULL, model = c(\"EndPoint\", \"AccumulatedTrajectory\", \"SeparateTrajectory\"), window = c(\"Moving Stanza\", \"Conversation\"), window.size.back = 1, window.size.forward = 0, weight.by = \"binary\", binary.stanzas = F, mask = NULL, include.meta = T, as.list = T, ...",
+      "exported": false
+    },
+    {
+      "r_name": "ena.correlations",
+      "python_name": "ena_correlations",
+      "source_file": "R/ena.correlations.R",
+      "arguments": "enaset, dims = c(1:2)",
+      "exported": true
+    },
+    {
+      "r_name": "ena.get.stats",
+      "python_name": "ena_get_stats",
+      "source_file": "R/ena.get.stats.R",
+      "arguments": "",
+      "exported": false
+    },
+    {
+      "r_name": "ena.group",
+      "python_name": "ena_group",
+      "source_file": "R/ena.group.R",
+      "arguments": "enaset = NULL, by = NULL, method = mean, names = as.vector(unique(by))",
+      "exported": true
+    },
+    {
+      "r_name": "ena.make.set",
+      "python_name": "ena_make_set",
+      "source_file": "R/ena.make.set.R",
+      "arguments": "enadata, dimensions = 2, norm.by = fun_sphere_norm, rotation.by = ena.svd, rotation.params = NULL, rotation.set = NULL, endpoints.only = TRUE, center.align.to.origin = TRUE, node.position.method = lws.positions.sq, as.list = TRUE, ...",
+      "exported": true
+    },
+    {
+      "r_name": "ena.optimize.set",
+      "python_name": "ena_optimize_set",
+      "source_file": "R/ena.optimize.set.R",
+      "arguments": "",
+      "exported": false
+    },
+    {
+      "r_name": "ena.plot",
+      "python_name": "ena_plot",
+      "source_file": "R/ena.plot.R",
+      "arguments": "enaset, title = \"ENA Plot\", dimension.labels = c(\"\",\"\"), font.size = 10, font.color = \"#000000\", font.family = c(\"Arial\", \"Courier New\", \"Times New Roman\"), scale.to = \"network\", #, \"points\"",
+      "exported": true
+    },
+    {
+      "r_name": "ena.plot.group",
+      "python_name": "ena_plot_group",
+      "source_file": "R/ena.plot.group.R",
+      "arguments": "enaplot, points = NULL, method = \"mean\", labels = NULL, colors = default.colors[1], shape = c(\"square\", \"triangle-up\", \"diamond\", \"circle\"), confidence.interval = c(\"none\", \"crosshairs\", \"box\"), outlier.interval = c(\"none\", \"crosshairs\", \"box\"), label.offset = \"bottom right\", label.font.size = NULL, label.font.color = NULL, label.font.family = NULL, show.legend = T, legend.name = NULL, ...",
+      "exported": true
+    },
+    {
+      "r_name": "plot_nodes",
+      "python_name": "plot_nodes",
+      "source_file": "R/ena.plot.network.R",
+      "arguments": "...",
+      "exported": false
+    },
+    {
+      "r_name": "plot_edges",
+      "python_name": "plot_edges",
+      "source_file": "R/ena.plot.network.R",
+      "arguments": "...",
+      "exported": false
+    },
+    {
+      "r_name": "ena.rotate.by.mean",
+      "python_name": "ena_rotate_by_mean",
+      "source_file": "R/ena.rotate.by.mean.R",
+      "arguments": "enaset, groups = NULL, params = groups",
+      "exported": true
+    },
+    {
+      "r_name": "orthogonal_svd",
+      "python_name": "orthogonal_svd",
+      "source_file": "R/ena.rotate.by.mean.R",
+      "arguments": "data, weights",
+      "exported": false
+    },
+    {
+      "r_name": "qr_ortho",
+      "python_name": "qr_ortho",
+      "source_file": "R/ena.rotate.by.mean.R",
+      "arguments": "A",
+      "exported": false
+    },
+    {
+      "r_name": "with.ena.matrix",
+      "python_name": "with_ena_matrix",
+      "source_file": "R/ena.rotate.by.regression.2.R",
+      "arguments": "data, expr, ...",
+      "exported": false
+    },
+    {
+      "r_name": "ena.rotation.h",
+      "python_name": "ena_rotation_h",
+      "source_file": "R/ena.rotation.h.R",
+      "arguments": "enaset, params",
+      "exported": true
+    },
+    {
+      "r_name": "ena.set",
+      "python_name": "ena_set",
+      "source_file": "R/ena.set.R",
+      "arguments": "x",
+      "exported": false
+    },
+    {
+      "r_name": "ena.svd",
+      "python_name": "ena_svd",
+      "source_file": "R/ena.svd.R",
+      "arguments": "enaset, params",
+      "exported": true
+    },
+    {
+      "r_name": "ena.svd.R6",
+      "python_name": "ena_svd_r6",
+      "source_file": "R/ena.svd.R",
+      "arguments": "enaset, ...",
+      "exported": false
+    },
+    {
+      "r_name": "ena.update.set",
+      "python_name": "ena_update_set",
+      "source_file": "R/ena.update.set.R",
+      "arguments": "",
+      "exported": false
+    },
+    {
+      "r_name": "ena.writeup",
+      "python_name": "ena_writeup",
+      "source_file": "R/ena.writeup.R",
+      "arguments": "enaset, tool = \"rENA\", tool.version = as.character(packageVersion(tool)), comparison = NULL, comparison.groups = NULL, sig.dig = 2, output_dir = getwd(), type = c(\"file\",\"stream\"), theory = T, methods = T, params = NULL, output_file = NULL, output_format = NULL",
+      "exported": true
+    },
+    {
+      "r_name": "methods_report",
+      "python_name": "methods_report",
+      "source_file": "R/ena.writeup.R",
+      "arguments": "toc = FALSE, toc_depth = 3, fig_width = 5, fig_height = 4, keep_md = FALSE, md_extensions = NULL, pandoc_args = NULL",
+      "exported": true
+    },
+    {
+      "r_name": "methods_report_stream",
+      "python_name": "methods_report_stream",
+      "source_file": "R/ena.writeup.R",
+      "arguments": "toc = FALSE, toc_depth = 3, fig_width = 5, fig_height = 4, keep_md = FALSE, md_extensions = NULL, pandoc_args = NULL",
+      "exported": true
+    },
+    {
+      "r_name": "compute_SB",
+      "python_name": "compute_sb",
+      "source_file": "R/gmr.R",
+      "arguments": "A, g",
+      "exported": false
+    },
+    {
+      "r_name": "gmr",
+      "python_name": "gmr",
+      "source_file": "R/gmr.R",
+      "arguments": "V,X",
+      "exported": true
+    },
+    {
+      "r_name": "get_x1_main_effect",
+      "python_name": "get_x1_main_effect",
+      "source_file": "R/gmr.R",
+      "arguments": "V, X, alpha = 1, lambda = \"lambda.min\"",
+      "exported": true
+    },
+    {
+      "r_name": "lws.positions.sq",
+      "python_name": "lws_positions_sq",
+      "source_file": "R/lws.positions.sq.R",
+      "arguments": "enaset",
+      "exported": false
+    },
+    {
+      "r_name": "lws.positions.sq.R6",
+      "python_name": "lws_positions_sq_r6",
+      "source_file": "R/lws.positions.sq.R",
+      "arguments": "enaset",
+      "exported": false
+    },
+    {
+      "r_name": "move_nodes_to_unit_circle",
+      "python_name": "move_nodes_to_unit_circle",
+      "source_file": "R/move_nodes.R",
+      "arguments": "set, dimension_name_1 = colnames(as.matrix(set$rotation$nodes))[1], dimension_name_2 = colnames(as.matrix(set$rotation$nodes))[2]",
+      "exported": true
+    },
+    {
+      "r_name": "move_nodes_to_unit_circle_with_equal_space",
+      "python_name": "move_nodes_to_unit_circle_with_equal_space",
+      "source_file": "R/move_nodes.R",
+      "arguments": "set, dimension_name_1 = colnames(as.matrix(set$rotation$nodes))[1], dimension_name_2 = colnames(as.matrix(set$rotation$nodes))[2]",
+      "exported": true
+    },
+    {
+      "r_name": "namesToAdjacencyKey",
+      "python_name": "names_to_adjacency_key",
+      "source_file": "R/namesToAdjacencyKey.R",
+      "arguments": "vector, upper_triangle = TRUE",
+      "exported": true
+    },
+    {
+      "r_name": "accumulate",
+      "python_name": "accumulate",
+      "source_file": "R/piped.R",
+      "arguments": "x, units = rENA::units(x), codes = rENA::codes(x), horizon = rENA::horizon(x), ..., ordered = FALSE, binary = TRUE",
+      "exported": true
+    },
+    {
+      "r_name": "model",
+      "python_name": "model",
+      "source_file": "R/piped.R",
+      "arguments": "data, ..., normalize = sphere_norm, center_with = center, rotate_with = rotate, project_with = project, optimize_with = optimize, # Rotation specific parameters rotate_fun = ena.rotate.by.generalized, rotate_params = list()",
+      "exported": true
+    },
+    {
+      "r_name": "sphere_norm",
+      "python_name": "sphere_norm",
+      "source_file": "R/piped.R",
+      "arguments": "x, add.meta = TRUE",
+      "exported": true
+    },
+    {
+      "r_name": "as_points_matrix",
+      "python_name": "as_points_matrix",
+      "source_file": "R/piped.R",
+      "arguments": "x, metadata = NULL",
+      "exported": false
+    },
+    {
+      "r_name": "as_line_weights_matrix",
+      "python_name": "as_line_weights_matrix",
+      "source_file": "R/piped.R",
+      "arguments": "x, metadata = NULL",
+      "exported": false
+    },
+    {
+      "r_name": "as_rotation_matrix",
+      "python_name": "as_rotation_matrix",
+      "source_file": "R/piped.R",
+      "arguments": "x",
+      "exported": false
+    },
+    {
+      "r_name": "as_nodes_matrix",
+      "python_name": "as_nodes_matrix",
+      "source_file": "R/piped.R",
+      "arguments": "x, rows, cols = NULL, cls = \"ena.matrix\"",
+      "exported": false
+    },
+    {
+      "r_name": "center",
+      "python_name": "center",
+      "source_file": "R/piped.R",
+      "arguments": "x, add.meta = TRUE",
+      "exported": true
+    },
+    {
+      "r_name": "rotate",
+      "python_name": "rotate",
+      "source_file": "R/piped.R",
+      "arguments": "x, ..., wh = ena.rotate.by.generalized",
+      "exported": true
+    },
+    {
+      "r_name": "project",
+      "python_name": "project",
+      "source_file": "R/piped.R",
+      "arguments": "x, rotation = NULL, add.meta = TRUE",
+      "exported": true
+    },
+    {
+      "r_name": "optimize",
+      "python_name": "optimize",
+      "source_file": "R/piped.R",
+      "arguments": "x, weights = NULL",
+      "exported": true
+    },
+    {
+      "r_name": "as.qe.data",
+      "python_name": "as_qe_data",
+      "source_file": "R/qedata_classes.R",
+      "arguments": "x",
+      "exported": true
+    },
+    {
+      "r_name": "as.qe.code",
+      "python_name": "as_qe_code",
+      "source_file": "R/qedata_classes.R",
+      "arguments": "x",
+      "exported": true
+    },
+    {
+      "r_name": "as.qe.metadata",
+      "python_name": "as_qe_metadata",
+      "source_file": "R/qedata_classes.R",
+      "arguments": "x",
+      "exported": true
+    },
+    {
+      "r_name": "as.qe.unit",
+      "python_name": "as_qe_unit",
+      "source_file": "R/qedata_classes.R",
+      "arguments": "x",
+      "exported": true
+    },
+    {
+      "r_name": "as.qe.horizon",
+      "python_name": "as_qe_horizon",
+      "source_file": "R/qedata_classes.R",
+      "arguments": "x",
+      "exported": true
+    },
+    {
+      "r_name": "is.qe.data",
+      "python_name": "is_qe_data",
+      "source_file": "R/qedata_classes.R",
+      "arguments": "x",
+      "exported": true
+    },
+    {
+      "r_name": "is.qe.code",
+      "python_name": "is_qe_code",
+      "source_file": "R/qedata_classes.R",
+      "arguments": "x",
+      "exported": true
+    },
+    {
+      "r_name": "is.qe.metadata",
+      "python_name": "is_qe_metadata",
+      "source_file": "R/qedata_classes.R",
+      "arguments": "x",
+      "exported": true
+    },
+    {
+      "r_name": "is.qe.unit",
+      "python_name": "is_qe_unit",
+      "source_file": "R/qedata_classes.R",
+      "arguments": "x",
+      "exported": true
+    },
+    {
+      "r_name": "is.qe.horizon",
+      "python_name": "is_qe_horizon",
+      "source_file": "R/qedata_classes.R",
+      "arguments": "x",
+      "exported": true
+    },
+    {
+      "r_name": "define",
+      "python_name": "define",
+      "source_file": "R/qedata_define.R",
+      "arguments": "x, metadata_cols = find_meta_cols(x), codes_cols = find_binary_cols(x), horizon_cols = NULL, units_cols = NULL",
+      "exported": true
+    },
+    {
+      "r_name": "do_call",
+      "python_name": "do_call",
+      "source_file": "R/qedata_define.R",
+      "arguments": "y, wh",
+      "exported": false
+    },
+    {
+      "r_name": "codes",
+      "python_name": "codes",
+      "source_file": "R/qedata_define.R",
+      "arguments": "x, ...",
+      "exported": true
+    },
+    {
+      "r_name": "metadata",
+      "python_name": "metadata",
+      "source_file": "R/qedata_define.R",
+      "arguments": "x, ...",
+      "exported": true
+    },
+    {
+      "r_name": "units",
+      "python_name": "units",
+      "source_file": "R/qedata_define.R",
+      "arguments": "x, ...",
+      "exported": true
+    },
+    {
+      "r_name": "horizon",
+      "python_name": "horizon",
+      "source_file": "R/qedata_define.R",
+      "arguments": "x, ...",
+      "exported": true
+    },
+    {
+      "r_name": "reclassify",
+      "python_name": "reclassify",
+      "source_file": "R/qedata_define.R",
+      "arguments": "x, v, ...",
+      "exported": true
+    },
+    {
+      "r_name": "find_meta_cols",
+      "python_name": "find_meta_cols",
+      "source_file": "R/utils.R",
+      "arguments": "x",
+      "exported": true
+    },
+    {
+      "r_name": "find_code_cols",
+      "python_name": "find_code_cols",
+      "source_file": "R/utils.R",
+      "arguments": "x",
+      "exported": true
+    },
+    {
+      "r_name": "find_binary_cols",
+      "python_name": "find_binary_cols",
+      "source_file": "R/utils.R",
+      "arguments": "x, include_logical = FALSE",
+      "exported": true
+    },
+    {
+      "r_name": "find_dimension_cols",
+      "python_name": "find_dimension_cols",
+      "source_file": "R/utils.R",
+      "arguments": "x",
+      "exported": true
+    },
+    {
+      "r_name": "remove_meta_data",
+      "python_name": "remove_meta_data",
+      "source_file": "R/utils.R",
+      "arguments": "x",
+      "exported": true
+    },
+    {
+      "r_name": ".DollarNames.ena.metadata",
+      "python_name": "dollar_names_ena_metadata",
+      "source_file": "R/utils.R",
+      "arguments": "x, pattern = \"\"",
+      "exported": false
+    },
+    {
+      "r_name": "summary.ena.set",
+      "python_name": "summary_ena_set",
+      "source_file": "R/utils.R",
+      "arguments": "object, ...",
+      "exported": false
+    },
+    {
+      "r_name": "print_dims",
+      "python_name": "print_dims",
+      "source_file": "R/utils.R",
+      "arguments": "n = 2",
+      "exported": false
+    },
+    {
+      "r_name": "print.ena.set",
+      "python_name": "print_ena_set",
+      "source_file": "R/utils.R",
+      "arguments": "x, ..., plot = FALSE, set = TRUE",
+      "exported": false
+    },
+    {
+      "r_name": "as_trajectory",
+      "python_name": "as_trajectory",
+      "source_file": "R/utils.R",
+      "arguments": "x, by = x$`_function.params`$conversation[1], model = c(\"AccumulatedTrajectory\", \"SeperateTrajectory\"), ...",
+      "exported": true
+    },
+    {
+      "r_name": "project_in",
+      "python_name": "project_in",
+      "source_file": "R/utils.R",
+      "arguments": "x, by = NULL, ...",
+      "exported": true
+    },
+    {
+      "r_name": "means_rotate",
+      "python_name": "means_rotate",
+      "source_file": "R/utils.R",
+      "arguments": "x, on = NULL",
+      "exported": true
+    },
+    {
+      "r_name": ".return",
+      "python_name": "return",
+      "source_file": "R/utils.R",
+      "arguments": "x, invisible = T, from_plot = F",
+      "exported": false
+    },
+    {
+      "r_name": "is_logical_col",
+      "python_name": "is_logical_col",
+      "source_file": "R/utils.R",
+      "arguments": "col",
+      "exported": false
+    },
+    {
+      "r_name": "is_binary_col",
+      "python_name": "is_binary_col",
+      "source_file": "R/utils.R",
+      "arguments": "col, include_logical = TRUE",
+      "exported": false
+    },
+    {
+      "r_name": "is.wholenumber",
+      "python_name": "is_wholenumber",
+      "source_file": "R/utils.R",
+      "arguments": "x, tol = .Machine$double.eps^0.5",
+      "exported": false
+    },
+    {
+      "r_name": "as.ena.matrix",
+      "python_name": "as_ena_matrix",
+      "source_file": "R/utils.classes.R",
+      "arguments": "x, new.class = NULL",
+      "exported": true
+    },
+    {
+      "r_name": "as.ena.metadata",
+      "python_name": "as_ena_metadata",
+      "source_file": "R/utils.classes.R",
+      "arguments": "x",
+      "exported": true
+    },
+    {
+      "r_name": "as.ena.code",
+      "python_name": "as_ena_code",
+      "source_file": "R/utils.classes.R",
+      "arguments": "x",
+      "exported": false
+    },
+    {
+      "r_name": "as.ena.codes",
+      "python_name": "as_ena_codes",
+      "source_file": "R/utils.classes.R",
+      "arguments": "x",
+      "exported": false
+    },
+    {
+      "r_name": "as.ena.co.occurrence",
+      "python_name": "as_ena_co_occurrence",
+      "source_file": "R/utils.classes.R",
+      "arguments": "x",
+      "exported": true
+    },
+    {
+      "r_name": "as.ena.dimension",
+      "python_name": "as_ena_dimension",
+      "source_file": "R/utils.classes.R",
+      "arguments": "x",
+      "exported": false
+    },
+    {
+      "r_name": "as.matrix.ena.line.weights",
+      "python_name": "as_matrix_ena_line_weights",
+      "source_file": "R/utils.matrix.R",
+      "arguments": "x, ..., square = FALSE",
+      "exported": false
+    },
+    {
+      "r_name": "as.matrix.ena.rotation.matrix",
+      "python_name": "as_matrix_ena_rotation_matrix",
+      "source_file": "R/utils.matrix.R",
+      "arguments": "x, ...",
+      "exported": false
+    },
+    {
+      "r_name": "as.matrix.ena.points",
+      "python_name": "as_matrix_ena_points",
+      "source_file": "R/utils.matrix.R",
+      "arguments": "x, ...",
+      "exported": false
+    },
+    {
+      "r_name": "as.matrix.ena.matrix",
+      "python_name": "as_matrix_ena_matrix",
+      "source_file": "R/utils.matrix.R",
+      "arguments": "x, ...",
+      "exported": false
+    },
+    {
+      "r_name": "as.matrix.ena.nodes",
+      "python_name": "as_matrix_ena_nodes",
+      "source_file": "R/utils.matrix.R",
+      "arguments": "x, ...",
+      "exported": false
+    },
+    {
+      "r_name": "as.matrix.row.connections",
+      "python_name": "as_matrix_row_connections",
+      "source_file": "R/utils.matrix.R",
+      "arguments": "x, ...",
+      "exported": false
+    },
+    {
+      "r_name": "as.matrix.ena.connections",
+      "python_name": "as_matrix_ena_connections",
+      "source_file": "R/utils.matrix.R",
+      "arguments": "x, ...",
+      "exported": false
+    },
+    {
+      "r_name": "plot.ena.set",
+      "python_name": "plot_ena_set",
+      "source_file": "R/utils.plot.R",
+      "arguments": "x, y, ..., empty = TRUE, title = \"ENA Plot\"",
+      "exported": false
+    },
+    {
+      "r_name": "add_points",
+      "python_name": "add_points",
+      "source_file": "R/utils.plot.R",
+      "arguments": "x, wh = NULL, ..., colors = NULL",
+      "exported": true
+    },
+    {
+      "r_name": "group",
+      "python_name": "group",
+      "source_file": "R/utils.plot.R",
+      "arguments": "x, wh = NULL",
+      "exported": true
+    },
+    {
+      "r_name": "add_trajectory",
+      "python_name": "add_trajectory",
+      "source_file": "R/utils.plot.R",
+      "arguments": "x, wh = NULL, ..., name = \"plot\"",
+      "exported": true
+    },
+    {
+      "r_name": "add_group",
+      "python_name": "add_group",
+      "source_file": "R/utils.plot.R",
+      "arguments": "x, wh = NULL, ...",
+      "exported": true
+    },
+    {
+      "r_name": "add_network",
+      "python_name": "add_network",
+      "source_file": "R/utils.plot.R",
+      "arguments": "x, wh = NULL, ..., with.mean = F, edge.multiplier = 1, colors = NULL",
+      "exported": true
+    },
+    {
+      "r_name": "add_nodes",
+      "python_name": "add_nodes",
+      "source_file": "R/utils.plot.R",
+      "arguments": "x, ..., return_plot = FALSE",
+      "exported": true
+    },
+    {
+      "r_name": "with_means",
+      "python_name": "with_means",
+      "source_file": "R/utils.plot.R",
+      "arguments": "x",
+      "exported": true
+    },
+    {
+      "r_name": "with_trajectory",
+      "python_name": "with_trajectory",
+      "source_file": "R/utils.plot.R",
+      "arguments": "x, ..., by = x$`_function.params`$conversation[1], add_jitter = TRUE, frame = 1100, transition = 1000, easing = \"circle-in-out\"",
+      "exported": true
+    },
+    {
+      "r_name": "prepare_trajectory_data",
+      "python_name": "prepare_trajectory_data",
+      "source_file": "R/utils.plot.R",
+      "arguments": "x = NULL, by = x$`_function.params`$conversation[1], rotation_matrix = x$rotation.matrix, points = NULL, units = points, units_by = x$`_function.params`$units, steps = NULL",
+      "exported": false
+    },
+    {
+      "r_name": "clear",
+      "python_name": "clear",
+      "source_file": "R/utils.plot.R",
+      "arguments": "x, wh = seq(x$plots)",
+      "exported": true
+    },
+    {
+      "r_name": "scale.ENAplot",
+      "python_name": "scale_enaplot",
+      "source_file": "R/utils.plot.R",
+      "arguments": "x, center = NULL, scale = NULL",
+      "exported": false
+    },
+    {
+      "r_name": "check_range",
+      "python_name": "check_range",
+      "source_file": "R/utils.plot.R",
+      "arguments": "x",
+      "exported": true
+    },
+    {
+      "r_name": "show",
+      "python_name": "show",
+      "source_file": "R/utils.plot.R",
+      "arguments": "x, ...",
+      "exported": true
+    },
+    {
+      "r_name": ".onLoad",
+      "python_name": "on_load",
+      "source_file": "R/zzz.R",
+      "arguments": "libname, pkgname",
+      "exported": false
+    },
+    {
+      "r_name": ".onAttach",
+      "python_name": "on_attach",
+      "source_file": "R/zzz.R",
+      "arguments": "libname, pkgname",
+      "exported": false
+    }
+  ],
+  "notes": "Generated from uploaded rENA package for pyENA porting template."
+}

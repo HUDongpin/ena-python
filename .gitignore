@@ -1,0 +1,63 @@
+# Byte-compiled / cache
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.ipynb_checkpoints/
+
+# Distribution / build
+build/
+dist/
+*.egg-info/
+.eggs/
+wheels/
+
+# Environments
+.venv/
+venv/
+env/
+ENV/
+
+# Coverage / tooling
+.coverage
+.coverage.*
+htmlcov/
+coverage.xml
+.tox/
+.nox/
+.hypothesis/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+
+# Machine-local agent/tool settings
+.claude/settings.local.json
+
+# Internal working documents. The technical review is kept locally rather than
+# published; its conclusions live in CHANGELOG.md. Move it under docs/ if you
+# decide to publish it.
+*_Technical Review.md
+
+# --- Project-specific -------------------------------------------------------
+
+# Vendored rENA reference material. rENA is a large third-party GPL-3 project with
+# its own upstream; see reference/README.md for how to obtain it. Keep the man pages
+# and manifest that ARE tracked, and exclude everything else.
+rENA-main/
+rENA-main*.zip
+reference/rENA/*
+!reference/rENA/man/
+!reference/rENA/man/**
+pyENA-*-internal-alpha/
+pyENA-*-internal-alpha.zip
+
+# Local research data. ENA inputs are often transcripts containing personal data;
+# keep them out of the repository by default.
+data/local/
+*.local.csv

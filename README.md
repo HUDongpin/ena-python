@@ -158,6 +158,8 @@ pyENA deflates, so its axes are orthogonal. The x axis matches rENA exactly. If 
 
 pyENA also names regression axes after the predictor (`score_reg`) where rENA names them after the first edge (`A & B_reg`) — an rENA naming bug from the same string/formula confusion. Names are cosmetic; the vectors match.
 
+This and four other rENA 0.3.1 issues found while porting are written up, with reproducible snippets, in **[`docs/rena-upstream-issues.md`](docs/rena-upstream-issues.md)**.
+
 See [`docs/testing_strategy.md`](docs/testing_strategy.md) and [`reference/README.md`](reference/README.md).
 
 ## Development

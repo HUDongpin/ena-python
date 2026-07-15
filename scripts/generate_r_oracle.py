@@ -475,6 +475,39 @@ rotations <- list(
   rotation_h_ctrl    = rotation_case(ena.rotation.h, list(x_var = "grp", control_vars = c("score")))
 )
 
+# --- Statistics ------------------------------------------------------------
+# Cohen's d: the mirrored x/y pair pins rENA's absolute convention. rENA takes
+# abs(mean(x) - mean(y)) (R/cohens.d.R), so d(x, y) == d(y, x) and the effect has no
+# direction -- worth pinning, because a signed convention upstream would silently flip
+# the direction of every group comparison built on it.
+cohens_cases <- list(
+  list(name = "x_gt_y",    x = c(5,6,7,8,9,10),     y = c(1,2,3,4,5,6)),
+  list(name = "x_lt_y",    x = c(1,2,3,4,5,6),      y = c(5,6,7,8,9,10)),
+  list(name = "equal",     x = c(1,2,3,4),          y = c(1,2,3,4)),
+  list(name = "uneven_n",  x = c(2,4,6,8,10,12,14), y = c(1,3,5)),
+  list(name = "decimals",  x = c(0.1,0.5,0.33,0.9), y = c(0.7,0.2,0.44,0.6)),
+  list(name = "negatives", x = c(-5,-3,-1,2),       y = c(4,6,1,-2))
+)
+cohens_d_fixture <- list()
+for (case in cohens_cases) {
+  cohens_d_fixture[[case$name]] <- list(x = case$x, y = case$y, d = fun_cohens.d(case$x, case$y))
+}
+
+# Correlations reuse the rank3 accumulation (6 units x 4 codes).
+stats_set2 <- ena.make.set(rank3_accum, dimensions = 2)
+stats_set3 <- ena.make.set(rank3_accum, dimensions = 3)
+corr2 <- ena.correlations(stats_set2)
+# dims must be 1:n -- rENA indexes the sliced matrix with the original dims values, so
+# c(1,3) or c(2,3) raise "subscript out of bounds". See docs/rena-upstream-issues.md.
+corr3 <- ena.correlations(stats_set3, dims = c(1, 2, 3))
+
+stats_pts <- as.matrix(stats_set2$points)
+stats_cent <- as.matrix(stats_set2$model$centroids)
+rcpp_corr <- tryCatch(
+  as.data.frame(rENA:::ena_correlation(stats_pts[, 1:2], stats_cent[, 1:2], 0.95)),
+  error = function(e) NULL
+)
+
 payload <- list(
   provenance = list(
     oracle_mode = oracle$mode,
@@ -496,6 +529,16 @@ payload <- list(
     input = plain_df(rot_rows),
     codes = rot_codes,
     cases = rotations
+  ),
+  stats = list(
+    cohens_d = cohens_d_fixture,
+    correlations = list(
+      dims2 = list(pearson = as.numeric(unlist(corr2[["pearson"]])),
+                   spearman = as.numeric(unlist(corr2[["spearman"]]))),
+      dims3 = list(pearson = as.numeric(unlist(corr3[["pearson"]])),
+                   spearman = as.numeric(unlist(corr3[["spearman"]])))
+    ),
+    rcpp_correlation = if (!is.null(rcpp_corr)) plain_df(rcpp_corr) else NULL
   ),
   rank3 = list(
     input = plain_df(rank3),

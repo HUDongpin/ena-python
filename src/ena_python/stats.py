@@ -7,13 +7,21 @@ import numpy as np
 import pandas as pd
 from scipy import stats as scipy_stats
 
+from ena_python.exceptions import ValidationError
 from ena_python.models import ENASet
 
 
 def cohens_d(
     x: pd.Series | np.ndarray | list[float], y: pd.Series | np.ndarray | list[float]
 ) -> float:
-    """Calculate rENA-style absolute Cohen's d for two samples."""
+    """Calculate Cohen's d for two samples, matching rENA `fun_cohens.d`.
+
+    The result is **absolute**: rENA takes `md <- abs(mean(x) - mean(y))`
+    (`R/cohens.d.R`), so d(x, y) == d(y, x) and the effect carries no direction. That
+    is rENA's behaviour rather than a simplification here -- verified against the
+    installed package on mirrored inputs. If you need the direction of a group
+    difference, compare the group means yourself.
+    """
 
     x_arr = np.asarray(x, dtype=float)
     y_arr = np.asarray(y, dtype=float)
@@ -64,13 +72,43 @@ def ena_correlation(
 
 
 def ena_correlations(enaset: ENASet, dims: list[str] | None = None) -> pd.DataFrame:
-    """Compute Pearson and Spearman correlations between points and centroids."""
+    """Compute Pearson and Spearman correlations between points and centroids.
+
+    Ports rENA `ena.correlations`, which correlates the pairwise differences between
+    unit points against the same differences between their centroids -- a goodness-of-fit
+    measure for the projection.
+
+    `dims` names the dimensions (default: the first two). Unlike rENA, which takes
+    positional indices, any subset works here: rENA's `dims` is used both to slice the
+    difference matrix and to index the slice, so anything other than `1:n` raises
+    "subscript out of bounds" upstream. See docs/rena-upstream-issues.md.
+
+    Note that a dimension can only be correlated if the model retains it: `make_set(...,
+    dimensions=2)` projects points onto two dimensions, so asking for `SVD3` requires
+    `dimensions=3`. rENA keeps every dimension in `points` and so never hits this.
+    """
 
     if enaset.centroids is None:
         raise ValueError("ENASet has no centroids")
     dimension_names = (
         dims or [col for col in enaset.points.columns if col in enaset.variance.index][:2]
     )
+    available = [col for col in dimension_names if col in enaset.points.columns]
+    missing = [col for col in dimension_names if col not in enaset.points.columns]
+    if missing:
+        retained = [col for col in enaset.points.columns if col in enaset.variance.index]
+        raise ValidationError(
+            f"Dimension(s) {', '.join(missing)} are not in this model's points, which "
+            f"retain {', '.join(retained) or 'none'}. `dimensions` in make_set() controls "
+            f"how many are projected -- rebuild with make_set(data, dimensions="
+            f"{max(len(dimension_names), len(retained) + 1)}) to correlate them."
+        )
+    missing_centroids = [col for col in available if col not in enaset.centroids.columns]
+    if missing_centroids:
+        raise ValidationError(
+            f"Dimension(s) {', '.join(missing_centroids)} are missing from the centroids"
+        )
+
     points = enaset.points.loc[:, dimension_names].to_numpy(dtype=float)
     centroids = enaset.centroids.loc[:, dimension_names].to_numpy(dtype=float)
     pairs = list(combinations(range(points.shape[0]), 2))

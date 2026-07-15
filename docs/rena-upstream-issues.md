@@ -4,7 +4,7 @@ Notes recorded while porting [rENA](https://gitlab.com/epistemic-analytics/qe-pa
 
 This exists for two reasons: so ena-python users understand why a given result may not match rENA, and so the findings are in a form the rENA maintainers can check and act on if they wish.
 
-Each is also tracked as an issue under the [`upstream-rena`](https://github.com/HUDongpin/ena-python/issues?q=label%3Aupstream-rena) label: [#1](https://github.com/HUDongpin/ena-python/issues/1), [#2](https://github.com/HUDongpin/ena-python/issues/2), [#3](https://github.com/HUDongpin/ena-python/issues/3), [#4](https://github.com/HUDongpin/ena-python/issues/4), [#5](https://github.com/HUDongpin/ena-python/issues/5). Those are **not** ena-python bugs; they live on this tracker because they came out of this port.
+Each is also tracked as an issue under the [`upstream-rena`](https://github.com/HUDongpin/ena-python/issues?q=label%3Aupstream-rena) label: [#1](https://github.com/HUDongpin/ena-python/issues/1), [#2](https://github.com/HUDongpin/ena-python/issues/2), [#3](https://github.com/HUDongpin/ena-python/issues/3), [#4](https://github.com/HUDongpin/ena-python/issues/4), [#5](https://github.com/HUDongpin/ena-python/issues/5), [#6](https://github.com/HUDongpin/ena-python/issues/6). Those are **not** ena-python bugs; they live on this tracker because they came out of this port.
 
 **Scope and caveats**
 
@@ -210,6 +210,55 @@ The rotation itself is correct — ena-python matches it exactly, including with
 
 ---
 
+## 6. `ena.correlations(dims = ...)` breaks for any subset that is not `1:n`
+
+Tracked as [#6](https://github.com/HUDongpin/ena-python/issues/6).
+
+**Severity: low — the documented parameter only works for its default-shaped values.**
+
+`dims` is documented as "The dimensions to calculate the correlations for. Default: c(1:2)", but only a contiguous range starting at 1 works:
+
+```r
+ena.correlations(set, dims = c(1, 2))     #> OK
+ena.correlations(set, dims = c(1, 2, 3))  #> OK
+ena.correlations(set, dims = c(1))        #> OK
+
+ena.correlations(set, dims = c(2, 3))     #> Error in optDiff[, dim] : subscript out of bounds
+ena.correlations(set, dims = c(1, 3))     #> Error in optDiff[, dim] : subscript out of bounds
+ena.correlations(set, dims = c(3, 4))     #> Error in optDiff[, dim] : subscript out of bounds
+```
+
+(The set above has SVD1..SVD6, so every one of those dimensions exists.)
+
+**Root cause.** `ena.correlations.R` uses `dims` twice, in two different coordinate systems. First to slice, which produces a matrix with `length(dims)` columns numbered `1..length(dims)`:
+
+```r
+svdDiff = matrix(points[point1, dims] - points[point2, dims], ncol=length(dims), nrow=length(point1))
+optDiff = matrix(centroids[point1, dims] - centroids[point2, dims], ncol=length(dims), nrow=length(point1))
+```
+
+and then to index *that* matrix, still using the original values:
+
+```r
+lapply(dims, function(dim) {
+  cor(as.numeric(svdDiff[,dim]), as.numeric(optDiff[,dim]), method=method)
+});
+```
+
+With `dims = c(2, 3)`, `svdDiff` has 2 columns but the code asks for column 3. It happens to work for `1:n` only because the sliced positions coincide with the requested indices.
+
+**Suggested fix:** index by position after slicing —
+
+```r
+lapply(seq_along(dims), function(i) {
+  cor(as.numeric(svdDiff[,i]), as.numeric(optDiff[,i]), method=method)
+});
+```
+
+**What ena-python does.** Takes dimension *names* (`dims=["SVD1", "SVD3"]`) and enumerates positionally, so any subset works. Note a different constraint applies: ena-python slices `points` to the model's `dimensions`, so correlating `SVD3` needs `make_set(..., dimensions=3)`; rENA keeps every dimension in `points` and so never needs this.
+
+---
+
 ## What matched
 
 For balance, the following were checked against real compiled rENA 0.3.1 and agree to within `1e-7`–`1e-10`, in most cases exactly:
@@ -217,6 +266,7 @@ For balance, the following were checked against real compiled rENA 0.3.1 and agr
 - `vector_to_ut`, `rows_to_co_occurrences`, `ref_window_df` (including infinite forward/back windows), `fun_sphere_norm`, `fun_skip_sphere_norm`, `center_data_c`, `lws_lsq_positions`, `ena_correlation`
 - EndPoint / Conversation / AccumulatedTrajectory / SeparateTrajectory accumulation and full models
 - SVD rotation, projected points, node positions, centroids, center vector, `variance`, `eigenvalues`
+- `fun_cohens.d` (6 cases, incl. mirrored inputs pinning its absolute convention), `ena.correlations` (pearson + spearman, 2 and 3 dims), and the compiled `ena_correlation` (r + Fisher CI)
 - `ena.rotate.by.mean`, `ena.rotate.by.generalized` (numeric and categorical targets, and x+y), `ena.rotate.by.hena.regression` (x axis), `ena.rotate.by.hena.regression_2`, `ena.rotation.h` (including control variables)
 
 See [`tests/test_r_oracle_parity.py`](../tests/test_r_oracle_parity.py) and the [README parity table](../README.md#parity-with-rena).
@@ -225,4 +275,4 @@ See [`tests/test_r_oracle_parity.py`](../tests/test_r_oracle_parity.py) and the 
 
 These have not been filed with the rENA maintainers. If you have a GitLab account on
 [epistemic-analytics/qe-packages/rENA](https://gitlab.com/epistemic-analytics/qe-packages/rENA)
-and want to report them, items 1–3 are the ones worth their time; each snippet above is self-contained.
+and want to report them, items 1–3 and 6 are the ones worth their time; each snippet above is self-contained.

@@ -521,3 +521,134 @@ def test_regression_xy_axes_are_orthogonal_unlike_rena() -> None:
         f"(cos={rena_cos:.4f}). rENA may have fixed the missing deflation, in which "
         f"case ena-python should match it column-for-column and this test should go."
     )
+
+
+# --- Statistics -------------------------------------------------------------
+# cohens_d and ena_correlations were the last functions with no numeric backing.
+# Expected values come from real compiled rENA 0.3.1.
+
+
+@pytest.mark.parametrize("case", ["x_gt_y", "x_lt_y", "equal", "uneven_n", "decimals", "negatives"])
+def test_cohens_d_matches_r_oracle(case: str) -> None:
+    from ena_python.stats import cohens_d
+
+    fixture = _load_fixture()
+    if "stats" not in fixture:
+        pytest.skip("Regenerate the fixture to include the stats cases")
+    expected = fixture["stats"]["cohens_d"][case]
+
+    got = cohens_d(expected["x"], expected["y"])
+    np.testing.assert_allclose(got, float(expected["d"]), atol=1e-12, rtol=0)
+
+
+def test_cohens_d_is_absolute_like_rena() -> None:
+    """rENA's effect size carries no direction, and neither does ours.
+
+    `fun_cohens.d` takes `md <- abs(mean(x) - mean(y))` (R/cohens.d.R), so swapping the
+    arguments cannot change the result. Worth pinning explicitly: had rENA been signed,
+    every group comparison built on this would point the opposite way, and the mirrored
+    x_gt_y/x_lt_y fixtures are what prove it is not.
+    """
+
+    from ena_python.stats import cohens_d
+
+    fixture = _load_fixture()
+    if "stats" not in fixture:
+        pytest.skip("Regenerate the fixture to include the stats cases")
+    cases = fixture["stats"]["cohens_d"]
+
+    # rENA itself returns the same value for mirrored inputs...
+    np.testing.assert_allclose(
+        float(cases["x_gt_y"]["d"]), float(cases["x_lt_y"]["d"]), atol=1e-12, rtol=0
+    )
+    # ...and so must we, for any input.
+    x, y = cases["negatives"]["x"], cases["negatives"]["y"]
+    assert cohens_d(x, y) == cohens_d(y, x)
+    assert cohens_d(x, y) >= 0
+
+
+def test_ena_correlations_match_r_oracle() -> None:
+    """Pearson and Spearman point/centroid correlations, against rENA."""
+
+    from ena_python.stats import ena_correlations
+
+    fixture = _load_fixture()
+    if "stats" not in fixture:
+        pytest.skip("Regenerate the fixture to include the stats cases")
+    expected = fixture["stats"]["correlations"]
+
+    got = ena_correlations(make_set(_rank3_accumulation(fixture), dimensions=2))
+    np.testing.assert_allclose(
+        got["pearson"].to_numpy(dtype=float),
+        np.asarray(expected["dims2"]["pearson"], dtype=float),
+        atol=1e-9,
+        rtol=0,
+    )
+    np.testing.assert_allclose(
+        got["spearman"].to_numpy(dtype=float),
+        np.asarray(expected["dims2"]["spearman"], dtype=float),
+        atol=1e-9,
+        rtol=0,
+    )
+
+    # A three-dimensional model, matching rENA's dims = c(1, 2, 3).
+    got3 = ena_correlations(
+        make_set(_rank3_accumulation(fixture), dimensions=3),
+        dims=["SVD1", "SVD2", "SVD3"],
+    )
+    np.testing.assert_allclose(
+        got3["pearson"].to_numpy(dtype=float),
+        np.asarray(expected["dims3"]["pearson"], dtype=float),
+        atol=1e-9,
+        rtol=0,
+    )
+    np.testing.assert_allclose(
+        got3["spearman"].to_numpy(dtype=float),
+        np.asarray(expected["dims3"]["spearman"], dtype=float),
+        atol=1e-9,
+        rtol=0,
+    )
+
+
+def test_ena_correlation_rcpp_matches_r_oracle() -> None:
+    """The r + Fisher confidence interval kernel, against rENA's compiled ena_correlation."""
+
+    from ena_python.stats import ena_correlation
+
+    fixture = _load_fixture()
+    if "stats" not in fixture or not fixture["stats"].get("rcpp_correlation"):
+        pytest.skip("Regenerate the fixture to include the Rcpp correlation case")
+
+    # rENA returns one row per dimension, columns [r, ci_lower, ci_upper].
+    expected = pd.DataFrame(fixture["stats"]["rcpp_correlation"]).to_numpy(dtype=float)
+    model = make_set(_rank3_accumulation(fixture), dimensions=2)
+    got = ena_correlation(
+        model.points[["SVD1", "SVD2"]].to_numpy(dtype=float),
+        model.centroids[["SVD1", "SVD2"]].to_numpy(dtype=float),
+        conf_level=0.95,
+    )
+
+    np.testing.assert_allclose(
+        got[["r", "ci_lower", "ci_upper"]].to_numpy(dtype=float), expected, atol=1e-9, rtol=0
+    )
+    assert (got["ci_lower"] <= got["r"]).all() and (got["r"] <= got["ci_upper"]).all()
+
+
+def test_ena_correlations_rejects_dimensions_the_model_does_not_have() -> None:
+    """Asking for a dimension the model never projected must say so clearly.
+
+    ena-python slices `points` to `dimensions`, so SVD3 does not exist in a 2-dimensional
+    model; this used to surface as a bare pandas KeyError. rENA keeps every dimension in
+    `points` and so never hits this.
+    """
+
+    from ena_python.exceptions import ValidationError
+    from ena_python.stats import ena_correlations
+
+    fixture = _load_fixture()
+    model = make_set(_rank3_accumulation(fixture), dimensions=2)
+
+    with pytest.raises(ValidationError, match="SVD3"):
+        ena_correlations(model, dims=["SVD1", "SVD3"])
+    with pytest.raises(ValidationError, match="dimensions=3"):
+        ena_correlations(model, dims=["SVD1", "SVD3"])

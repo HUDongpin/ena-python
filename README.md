@@ -160,13 +160,14 @@ Golden fixtures are generated from **real, compiled rENA 0.3.1** and stamped wit
 | hENA regression / regression_2 | **Yes** for the x axis; y axis diverges by design (see below) |
 | hENA `rotation_h` | **Yes** — incl. control variables |
 | Mean rotation | Partly — `MR1`/`SVD2` only |
-| Cohen's d, `ena_correlations` | **No** |
+| Cohen's d | **Yes** — 6 cases, incl. mirrored inputs |
+| `ena_correlations`, `ena_correlation` | **Yes** — pearson/spearman and the Fisher-CI kernel |
 
 See [`docs/testing_strategy.md`](docs/testing_strategy.md) and [`reference/README.md`](reference/README.md).
 
 ## Issues found in rENA 0.3.1
 
-Porting turned up five places where rENA 0.3.1 behaves differently from what its own code, comments, or docs intend. They are written up with reproducible snippets in **[`docs/rena-upstream-issues.md`](docs/rena-upstream-issues.md)**, and tracked here under the [`upstream-rena`](https://github.com/HUDongpin/ena-python/issues?q=label%3Aupstream-rena) label.
+Porting turned up six places where rENA 0.3.1 behaves differently from what its own code, comments, or docs intend. They are written up with reproducible snippets in **[`docs/rena-upstream-issues.md`](docs/rena-upstream-issues.md)**, and tracked here under the [`upstream-rena`](https://github.com/HUDongpin/ena-python/issues?q=label%3Aupstream-rena) label.
 
 | # | Issue | Severity | ena-python |
 |---|---|---|---|
@@ -175,6 +176,7 @@ Porting turned up five places where rENA 0.3.1 behaves differently from what its
 | [3](docs/rena-upstream-issues.md#3-the-documented-x_var-form-raises-an-error) | The documented `"lm(formula=V ~ ...)"` param form errors | Low | Takes the plain formula |
 | [4](docs/rena-upstream-issues.md#4-enarotatebyhenaregression_2-errors-cryptically-on-rank-deficient-input) | `regression_2` errors cryptically on rank-deficient input | Low | Differs, but **not** better — see the doc |
 | [5](docs/rena-upstream-issues.md#5-enarotationh-emits-a-datatable-warning-on-every-call) | `ena.rotation.h` warns on every call | Trivial | n/a |
+| [6](docs/rena-upstream-issues.md#6-enacorrelationsdims-breaks-for-any-subset-that-is-not-1n) | `ena.correlations(dims=)` errors for any subset that is not `1:n` | Low | Takes dimension names; any subset works |
 
 These are **rENA issues, not ena-python bugs**, reported as observations rather than accusations — they may be fixed upstream or intended. Only #1 changes ena-python's output relative to rENA:
 

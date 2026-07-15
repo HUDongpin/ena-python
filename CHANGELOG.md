@@ -51,6 +51,12 @@ instead of being smoke-tested only.
   x+y, and control variables. All 9 match rENA across every dimension.
 - A rotation fixture dataset (8 units × 4 codes) with unit-level categorical and
   numeric covariates, and model-level fixtures per model type.
+- Numeric parity for **`cohens_d`, `ena_correlations`, and `ena_correlation`** — the
+  last functions with no numeric backing. All match rENA. The review had flagged that
+  rENA's `fun_cohens.d` "may return a signed value", which would have flipped the
+  direction of every group comparison: it does not. rENA takes
+  `abs(mean(x) - mean(y))` (`R/cohens.d.R`), so both are absolute and agree. Mirrored
+  x/y fixtures pin that convention so a future signed rewrite fails loudly.
 
 ### Changed
 
@@ -63,6 +69,10 @@ instead of being smoke-tested only.
   sibling `ena.rotate.by.generalized` deflates correctly on the same data. ena-python
   deflates, giving orthogonal axes; the x axis still matches rENA exactly. A test
   fails if rENA ever fixes this, prompting ena-python to match it.
+- `ena_correlations` now raises a `ValidationError` naming the missing dimension and
+  the `dimensions=` value needed, instead of a bare pandas `KeyError`, when asked for a
+  dimension the model did not project. (ena-python slices `points` to `dimensions`;
+  rENA keeps every dimension and never hits this.)
 - Regression axes are named after the predictor (`score_reg`) rather than rENA's
   `A & B_reg`, which comes from the same string/formula confusion (`all.vars()` on a
   string returns nothing, so rENA falls back to the first edge name). Cosmetic; the

@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "ena-python"
-version = "0.2.0"
+version = "0.2.1"
 description = "Python implementation of Epistemic Network Analysis, ported from the R package rENA."
 readme = "README.md"
 requires-python = ">=3.10"
@@ -14,13 +14,15 @@ authors = [
 ]
 keywords = ["ENA", "epistemic-network-analysis", "quantitative-ethnography", "network-analysis"]
 classifiers = [
-  "Development Status :: 2 - Pre-Alpha",
+  "Development Status :: 3 - Alpha",
   "Intended Audience :: Science/Research",
   "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
   "Programming Language :: Python :: 3",
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
   "Topic :: Scientific/Engineering :: Information Analysis",
 ]
 # Keep this list minimal: ena-python is intended to run under Pyodide/browser Python,

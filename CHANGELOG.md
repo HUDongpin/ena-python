@@ -3,6 +3,30 @@
 All notable changes to ena-python (formerly pyENA) are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versioning is [SemVer](https://semver.org/).
 
+## [0.2.1] — 2026-07-16
+
+Documentation and metadata only — no code changes. PyPI renders a project's page from
+the README **inside the uploaded artifact**, so the stale lines below were visible on
+the 0.2.0 PyPI page and could only be corrected by publishing a fixed build.
+
+### Fixed (docs/metadata)
+
+- The README status line still read "early release (0.1.0)" — on the 0.2.0 PyPI page.
+  Now version-agnostic, and it no longer claims parts are unverified: since the
+  mean-rotation completion basis was pinned, every numeric path is checked against
+  compiled rENA 0.3.1.
+- The parity table still marked the mean rotation "Partly — MR1/SVD2 only"; it has been
+  verified across its full completion basis since before 0.2.0.
+- The wheel was described as "~147 KB". That was its *uncompressed* contents; twine's
+  upload log suggested 74 KB, but that is the upload payload including the metadata
+  form. The wheel pip actually downloads is **~53 KB**, verified against the published
+  0.2.0 artifact.
+- Browser-demo timings replaced with a measured cold run against the published 0.2.0
+  (16.1 s total; "no further dependencies" confirmed) instead of pre-release estimates.
+- Trove classifiers: Development Status Pre-Alpha → **Alpha**; added Python **3.13**
+  (tested in CI) and **3.14** (this project's native development ran on CPython 3.14.6
+  throughout, and the Pyodide demo runs on 3.14.2).
+
 ## [0.2.0] — 2026-07-16
 
 Everything verified since 0.1.0. **Upgrade if you installed 0.1.0 from PyPI**: it
@@ -221,5 +245,6 @@ Addresses the findings of the 2026-07-15 technical review of 0.0.1 (internal alp
 - Released to PyPI as `ena-python` (see Unreleased): the `pyena` name belongs to
   an unrelated project, so this release went out under the new name.
 
+[0.2.1]: https://github.com/HUDongpin/ena-python/releases/tag/v0.2.1
 [0.2.0]: https://github.com/HUDongpin/ena-python/releases/tag/v0.2.0
 [0.1.0]: https://github.com/HUDongpin/ena-python/releases/tag/v0.1.0

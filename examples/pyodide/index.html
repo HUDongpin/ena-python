@@ -202,7 +202,7 @@ async function main() {
     await micropip.install("ena-python");
     const extra = pyodide.runPython(
       "import sys; 'scipy' if 'scipy' in sys.modules or __import__('importlib.util', fromlist=['x']).find_spec('scipy') else ''");
-    log(`ena-python installed (pure-python wheel, ~147 KB)${extra ? ` — plus ${extra}, which this version still requires` : " — no further dependencies"}`);
+    log(`ena-python installed (pure-python wheel, ~53 KB)${extra ? ` — plus ${extra}, which this version still requires` : " — no further dependencies"}`);
 
     setStatus("Running ENA…");
     const result = JSON.parse(pyodide.runPython(PYTHON));

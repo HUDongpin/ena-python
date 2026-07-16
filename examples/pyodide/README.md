@@ -20,17 +20,20 @@ WebAssembly runtime, and browsers block those requests on `file://`.
 
 ## Measured on a 2026 laptop (Chrome, warm CDN cache)
 
-| Step | Elapsed |
+One measured cold run against the published 0.2.0 (run-to-run totals observed between
+~12 s and ~18 s, dominated by network):
+
+| Step | Cumulative |
 |---|---:|
-| Pyodide runtime ready | ~3 s |
-| numpy + pandas loaded | ~3.5 s |
-| `micropip.install("ena-python")` | ~0.7 s |
-| **`ena()` on 4 units × 3 codes** | **~0.02 s** |
-| Total, cold | ~12 s |
+| Pyodide runtime ready | 2.6 s |
+| numpy + pandas loaded | 3.8 s |
+| `micropip.install("ena-python")` done | 10.7 s |
+| **`ena()` on 4 units × 3 codes** | **+0.02–0.07 s** |
+| Total | 16.1 s |
 
 The analysis itself is milliseconds. Essentially all of the wait is downloading numpy and
 pandas as WebAssembly wheels — about 7 MB, fetched once and then cached by the browser.
-ena-python's own wheel is **147 KB**.
+ena-python's own wheel is a **~53 KB** download. (Two earlier figures here were wrong in instructive ways: 147 KB was the wheel's *uncompressed* contents, and 74 KB was twine's *upload payload* including the metadata form. 53 KB is what pip and micropip actually fetch — verified against the published artifact.)
 
 SciPy used to make that 20 MB. It was dropped in 0.2.0: only three calls needed it
 (`norm.ppf`, `pearsonr`, `spearmanr`), and the standard library and NumPy give the same
@@ -97,7 +100,7 @@ rows = pd.read_csv(io.StringIO(csv_text))
 - Pinned to Pyodide **v314.0.2**, which ships numpy 2.4.3 and pandas 3.0.2 — both
   satisfying ena-python's requirements.
 - `micropip.install("ena-python")` takes whatever is current on PyPI. Pin it
-  (`ena-python==0.1.0`) if you need a reproducible page.
+  (`ena-python==0.2.1`) if you need a reproducible page.
 - The page loads only `numpy` and `pandas`, and lets `micropip` resolve whatever the
   published version declares. That way it works against 0.1.0 (which pulls SciPy) and
   0.2.0+ (which does not) with no edit.

@@ -11,7 +11,7 @@
 
 It is a standalone library: `import ena_python` needs only **NumPy and pandas**. No SciPy, no R, no Node, no server, and no network access. That keeps it usable in a notebook, in a script, or in browser Python — see the [**runnable Pyodide demo**](examples/pyodide/), which installs ena-python from PyPI and runs a full analysis in a browser tab.
 
-> **Status: early release (0.1.0).** The core pipeline — accumulation, the moving-stanza window, normalization, centering, SVD projection, node positioning, and mean rotation — is checked numerically against real rENA 0.3.1. Other parts are not; see [Parity with rENA](#parity-with-rena) for exactly which. The API may still change.
+> **Status: early release.** Every numeric path — accumulation across all window types and models, the SVD / mean / generalized / regression / hENA rotations, node positions, `variance`/`eigenvalues`, Cohen's d, and the correlation functions — is checked against real **compiled rENA 0.3.1**; see the [parity table](#parity-with-rena), which also records the one deliberate, documented divergence. The API may still change.
 
 ## Install
 
@@ -116,7 +116,7 @@ Metadata must be constant within a unit. A metadata column that varies inside a 
 ## In the browser
 
 ena-python runs under [Pyodide](https://pyodide.org/) with no server and no build step —
-the wheel is pure Python (147 KB) and its only dependencies (numpy, pandas) both ship
+the wheel is pure Python (a ~53 KB download) and its only dependencies (numpy, pandas) both ship
 as Pyodide packages.
 
 ```js
@@ -127,7 +127,7 @@ pyodide.runPython(`from ena_python import ena; ...`);
 ```
 
 [`examples/pyodide/`](examples/pyodide/) is a complete working page that does this and
-plots the result. On a 2026 laptop the analysis takes ~0.02 s; the ~18 s cold start is
+plots the result. On a 2026 laptop the analysis takes 0.02–0.07 s; the ~10–16 s cold start is
 almost entirely the browser downloading numpy and pandas as WebAssembly, which it then
 caches — about 7 MB, down from 20 MB before SciPy was dropped.
 
@@ -179,7 +179,7 @@ Golden fixtures are generated from **real, compiled rENA 0.3.1** and stamped wit
 | Generalized rotation (`gmr`) | **Yes** — numeric and categorical targets, and x+y |
 | hENA regression / regression_2 | **Yes** for the x axis; y axis diverges by design (see below) |
 | hENA `rotation_h` | **Yes** — incl. control variables |
-| Mean rotation | Partly — `MR1`/`SVD2` only |
+| Mean rotation | **Yes** — full basis incl. the SVD completion (its direction is QR-conventional, as in rENA — see above) |
 | Cohen's d | **Yes** — 6 cases, incl. mirrored inputs |
 | `ena_correlations`, `ena_correlation` | **Yes** — pearson/spearman and the Fisher-CI kernel |
 

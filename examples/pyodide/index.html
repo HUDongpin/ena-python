@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ena-python in the browser (Pyodide)</title>
+<style>
+  :root { color-scheme: light dark; }
+  body {
+    font: 15px/1.55 ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+    max-width: 860px; margin: 0 auto; padding: 2rem 1.25rem;
+  }
+  h1 { font-size: 1.5rem; margin: 0 0 .25rem; }
+  .sub { opacity: .7; margin: 0 0 1.5rem; }
+  #status {
+    padding: .6rem .8rem; border-radius: 6px; margin-bottom: 1rem;
+    background: color-mix(in srgb, currentColor 8%, transparent);
+    font-variant-numeric: tabular-nums;
+  }
+  #log {
+    font: 12.5px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace;
+    white-space: pre-wrap; padding: .8rem; border-radius: 6px; min-height: 7rem;
+    background: color-mix(in srgb, currentColor 6%, transparent);
+    overflow-x: auto;
+  }
+  table { border-collapse: collapse; margin: .75rem 0; font-variant-numeric: tabular-nums; }
+  th, td { padding: .3rem .7rem; text-align: right; border-bottom: 1px solid color-mix(in srgb, currentColor 20%, transparent); }
+  th:first-child, td:first-child { text-align: left; }
+  .ok { color: #128a3f; } .err { color: #c0392b; }
+  section { margin-top: 1.75rem; }
+  code { background: color-mix(in srgb, currentColor 10%, transparent); padding: .1rem .3rem; border-radius: 3px; }
+</style>
+</head>
+<body>
+<h1>ena-python in the browser</h1>
+<p class="sub">Epistemic Network Analysis running as Python in a browser tab — no server, no install, no R.</p>
+
+<div id="status">Starting…</div>
+<div id="log"></div>
+
+<section id="results" hidden>
+  <h2 style="font-size:1.1rem">ENA plot</h2>
+  <div id="chart"></div>
+  <h2 style="font-size:1.1rem">Unit positions</h2>
+  <div id="points"></div>
+  <h2 style="font-size:1.1rem">Variance explained</h2>
+  <div id="variance"></div>
+</section>
+
+<section>
+  <h2 style="font-size:1.1rem">What this page does</h2>
+  <ol>
+    <li>Loads <a href="https://pyodide.org/">Pyodide</a> (CPython compiled to WebAssembly).</li>
+    <li><code>micropip.install("ena-python")</code> — straight from PyPI, no build step, because the wheel is pure Python.</li>
+    <li>Runs a real ENA pipeline: accumulate → model → points, variance, node positions.</li>
+  </ol>
+  <p>
+    Everything below is computed in this tab. The first load pulls numpy, pandas and
+    scipy as WebAssembly wheels (tens of MB), so it is slow once and cached after.
+  </p>
+</section>
+
+<script src="https://cdn.jsdelivr.net/pyodide/v314.0.2/full/pyodide.js"></script>
+<script>
+const statusEl = document.getElementById("status");
+const logEl = document.getElementById("log");
+const t0 = performance.now();
+
+const since = () => `${((performance.now() - t0) / 1000).toFixed(1)}s`;
+function log(msg) { logEl.textContent += `[${since().padStart(5)}] ${msg}\n`; }
+function setStatus(msg, cls) { statusEl.textContent = msg; statusEl.className = cls || ""; }
+
+// Rendered from the Python side so the table reflects real output, not a hand-written copy.
+function table(target, payload) {
+  const { columns, rows } = payload;
+  const head = `<tr>${columns.map((c) => `<th>${c}</th>`).join("")}</tr>`;
+  const body = rows.map((r) => `<tr>${r.map((v) => `<td>${v}</td>`).join("")}</tr>`).join("");
+  document.getElementById(target).innerHTML = `<table>${head}${body}</table>`;
+}
+
+const PYTHON = `
+import json, time
+import pandas as pd
+import ena_python
+from ena_python import ena
+
+# One row per coded utterance, binary code columns. The four units emphasise
+# different code pairs, so they land in different parts of the space.
+rows = pd.DataFrame({
+    "unit": sum([[f"u{i}"] * 4 for i in range(1, 5)], []),
+    "conv": ["c1", "c1", "c2", "c2"] * 4,
+    "Data":          [1,1,1,0,  1,0,0,0,  0,0,1,0,  1,1,0,1],
+    "Design":        [1,1,0,1,  1,1,1,1,  0,1,0,0,  1,0,1,1],
+    "Collaboration": [0,0,1,0,  0,1,0,1,  1,1,1,1,  0,1,1,1],
+})
+
+start = time.perf_counter()
+model = ena(
+    data=rows,
+    codes=["Data", "Design", "Collaboration"],
+    units=["unit"],
+    conversation=["conv"],
+    window_size_back=2,
+)
+elapsed = time.perf_counter() - start
+
+points = model.points[["ENA_UNIT", "SVD1", "SVD2"]]
+nodes = model.nodes[["code", "SVD1", "SVD2"]]
+json.dumps({
+    "version": ena_python.__version__,
+    "elapsed": round(elapsed, 4),
+    "points": {
+        "columns": ["unit", "SVD1", "SVD2"],
+        "rows": [[r.ENA_UNIT, f"{r.SVD1:+.4f}", f"{r.SVD2:+.4f}"] for r in points.itertuples()],
+    },
+    "variance": {
+        "columns": ["dimension", "variance explained"],
+        "rows": [[d, f"{v:.1%}"] for d, v in model.variance.items()],
+    },
+    # Raw coordinates for the plot below. Edge weights are the mean line weight per
+    # code pair -- the same quantity ena_python.plotting.add_network draws.
+    "plot": {
+        "units": [{"label": r.ENA_UNIT, "x": r.SVD1, "y": r.SVD2} for r in points.itertuples()],
+        "nodes": [{"label": r.code, "x": r.SVD1, "y": r.SVD2} for r in nodes.itertuples()],
+        "edges": [
+            {"source": name.split(" & ")[0], "target": name.split(" & ")[1], "weight": float(w)}
+            for name, w in model.line_weights[model.data.adjacency_names].mean(axis=0).items()
+        ],
+    },
+})
+`;
+
+// A real ENA network plot: code nodes joined by edges whose width is the mean line
+// weight, with unit points on the same axes. Inline SVG keeps the page dependency-free
+// -- ena-python ships Plotly helpers, but Plotly is an optional extra and not worth
+// another megabyte here.
+//
+// Units and nodes share one scale, which is what ena_python's own ena_plot does by
+// default (scale_to="network"). Node positions are ~6x larger than unit points, so the
+// units genuinely sit in a tight cloud near the origin -- that is what an ENA plot of
+// four units looks like, not a bug.
+function plot(target, data) {
+  const size = 460, pad = 64;
+  const extent = Math.max(...[...data.units, ...data.nodes]
+    .map((p) => Math.max(Math.abs(p.x), Math.abs(p.y)))) * 1.15 || 1;
+  const sx = (v) => pad + ((v + extent) / (2 * extent)) * (size - 2 * pad);
+  const sy = (v) => size - pad - ((v + extent) / (2 * extent)) * (size - 2 * pad);
+  const at = Object.fromEntries(data.nodes.map((n) => [n.label, n]));
+  const maxW = Math.max(...data.edges.map((e) => e.weight)) || 1;
+
+  const axes = `
+    <line x1="${pad / 2}" y1="${sy(0)}" x2="${size - pad / 2}" y2="${sy(0)}" stroke="currentColor" stroke-opacity=".2"/>
+    <line x1="${sx(0)}" y1="${pad / 2}" x2="${sx(0)}" y2="${size - pad / 2}" stroke="currentColor" stroke-opacity=".2"/>`;
+
+  const edges = data.edges.map((e) => {
+    const a = at[e.source], b = at[e.target];
+    if (!a || !b) return "";
+    return `<line x1="${sx(a.x)}" y1="${sy(a.y)}" x2="${sx(b.x)}" y2="${sy(b.y)}"
+      stroke="#c0392b" stroke-opacity=".35" stroke-width="${(e.weight / maxW) * 7 + 0.5}"/>`;
+  }).join("");
+
+  // Labels sit centred above their marker. Anchoring them left/right of the point
+  // clipped the longest code name ("Collaboration") against the viewBox edge, and made
+  // the tightly-clustered unit labels collide with each other.
+  const label = (p, dy, fill, weight) =>
+    `<text x="${sx(p.x)}" y="${sy(p.y) - dy}" font-size="11" text-anchor="middle"
+      font-weight="${weight}" fill="${fill}">${p.label}</text>`;
+  const nodes = data.nodes.map((n) =>
+    `<circle cx="${sx(n.x)}" cy="${sy(n.y)}" r="6" fill="#c0392b"/>${label(n, 11, "#c0392b", 600)}`).join("");
+  // Units alternate above/below so the cluster near the origin stays readable.
+  const units = data.units.map((u, i) =>
+    `<circle cx="${sx(u.x)}" cy="${sy(u.y)}" r="4" fill="#2563eb"/>${label(u, i % 2 ? -14 : 9, "#2563eb", 400)}`).join("");
+
+  document.getElementById(target).innerHTML =
+    `<svg viewBox="0 0 ${size} ${size}" width="${size}" height="${size}" role="img"
+      aria-label="ENA network plot: code nodes joined by weighted edges, with unit points">
+      ${axes}${edges}${nodes}${units}</svg>
+     <p style="opacity:.7;font-size:13px;margin:.25rem 0;max-width:42rem">
+       <span style="color:#c0392b">\u25cf</span> code nodes, joined by edges whose width is the
+       mean connection strength &nbsp; <span style="color:#2563eb">\u25cf</span> units.
+       Both on the same axes (SVD1 horizontal, SVD2 vertical), as ena_plot does by default —
+       node positions run ~6x wider than unit points, so four units cluster tightly.</p>`;
+}
+
+async function main() {
+  try {
+    setStatus("Loading Pyodide…");
+    log("loading pyodide v314.0.2 from jsdelivr");
+    const pyodide = await loadPyodide();
+    log(`pyodide ready — Python ${pyodide.runPython("import sys; sys.version.split()[0]")}`);
+
+    setStatus("Downloading numpy, pandas, scipy…");
+    log("loading micropip + scientific stack (the slow part; cached afterwards)");
+    await pyodide.loadPackage(["micropip", "numpy", "pandas", "scipy"]);
+    log("numpy / pandas / scipy ready");
+
+    setStatus("Installing ena-python from PyPI…");
+    const micropip = pyodide.pyimport("micropip");
+    await micropip.install("ena-python");
+    log("ena-python installed (pure-python wheel, ~147 KB)");
+
+    setStatus("Running ENA…");
+    const result = JSON.parse(pyodide.runPython(PYTHON));
+    log(`ena-python ${result.version} — ena() took ${result.elapsed}s for ${result.points.rows.length} units`);
+    log(`node positions computed: ${result.plot.nodes.length}`);
+
+    plot("chart", result.plot);
+    table("points", result.points);
+    table("variance", result.variance);
+    document.getElementById("results").hidden = false;
+    setStatus(`Done in ${since()} — ENA ran entirely in this tab.`, "ok");
+  } catch (err) {
+    setStatus("Failed — see the log.", "err");
+    log(`ERROR: ${err}`);
+    throw err;
+  }
+}
+
+main();
+</script>
+</body>
+</html>

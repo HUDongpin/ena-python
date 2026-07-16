@@ -36,8 +36,9 @@ Thumbs.db
 .vscode/
 *.swp
 
-# Machine-local agent/tool settings
-.claude/settings.local.json
+# Machine-local agent/tool settings. The Pyodide demo needs no launcher config --
+# examples/pyodide/README.md documents `python3 -m http.server`.
+.claude/
 
 # Internal working documents. The technical review is kept locally rather than
 # published; its conclusions live in CHANGELOG.md. Move it under docs/ if you

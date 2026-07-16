@@ -9,7 +9,7 @@
 
 > Formerly **pyENA**. Renamed because an unrelated package already owns `pyena` on PyPI — including the `pyena` module name — so keeping it would have collided for anyone who installed both.
 
-It is a standalone library: `import ena_python` needs only NumPy, pandas, and SciPy. No R, no Node, no server, and no network access. That keeps it usable in a notebook, in a script, or in browser Python (Pyodide).
+It is a standalone library: `import ena_python` needs only NumPy, pandas, and SciPy. No R, no Node, no server, and no network access. That keeps it usable in a notebook, in a script, or in browser Python — see the [**runnable Pyodide demo**](examples/pyodide/), which installs ena-python from PyPI and runs a full analysis in a browser tab.
 
 > **Status: early release (0.1.0).** The core pipeline — accumulation, the moving-stanza window, normalization, centering, SVD projection, node positioning, and mean rotation — is checked numerically against real rENA 0.3.1. Other parts are not; see [Parity with rENA](#parity-with-rena) for exactly which. The API may still change.
 
@@ -112,6 +112,24 @@ Metadata must be constant within a unit. A metadata column that varies inside a 
 **SVD signs are not canonical.** As in any SVD, an axis may be mirrored relative to rENA or across platforms. Compare sign-aligned (see `_sign_align` in `tests/test_r_oracle_parity.py`).
 
 **A mean rotation's direction is arbitrary too.** Passing `rotation_params=[g1, g2]` does *not* orient the axis from `g1` toward `g2` — swapping them yields an identical `MR1`, because the mean difference goes through a QR decomposition whose sign convention ignores the input's sign. rENA does the same. Read the group centroids to see which side is which rather than trusting the sign.
+
+## In the browser
+
+ena-python runs under [Pyodide](https://pyodide.org/) with no server and no build step —
+the wheel is pure Python (147 KB) and its only dependencies (numpy, pandas, scipy) all
+ship as Pyodide packages.
+
+```js
+const pyodide = await loadPyodide();
+await pyodide.loadPackage(["micropip", "numpy", "pandas", "scipy"]);
+await pyodide.pyimport("micropip").install("ena-python");
+pyodide.runPython(`from ena_python import ena; ...`);
+```
+
+[`examples/pyodide/`](examples/pyodide/) is a complete working page that does this and
+plots the result. On a 2026 laptop the analysis takes ~0.02 s; the ~18 s cold start is
+almost entirely the browser downloading numpy/pandas/scipy as WebAssembly, which it then
+caches.
 
 ## Plotting and serving
 

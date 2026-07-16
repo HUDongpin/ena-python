@@ -5,8 +5,10 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); version
 
 ## [0.2.0] — 2026-07-16
 
-Everything verified since 0.1.0. **Upgrade if you are on 0.1.0**: it carries three bugs
-fixed here, and its accumulation is 10x slower.
+Everything verified since 0.1.0. **Upgrade if you installed 0.1.0 from PyPI**: it
+carries two of the bugs fixed here (duplicate-index row misalignment; the pandas 3 NaN
+crash) and its accumulation is 10x slower. Builds from the `v0.1.0` git tag additionally
+predate the trajectory fix and the parity work below.
 
 ### Removed
 
@@ -114,7 +116,10 @@ First public release.
 > **Note on this version number.** The wheel uploaded to PyPI as `ena-python` 0.1.0
 > includes the rename below. The git tag `v0.1.0` predates it and still builds the
 > `pyena` module, because the tag was cut before the rename. Nothing depends on the tag;
-> the PyPI artifact is authoritative for what 0.1.0 means.
+> the PyPI artifact is authoritative for what 0.1.0 means. Verified against the wheel
+> itself: the PyPI 0.1.0 build also already contains the trajectory `conv` fix and the
+> trajectory/Conversation/rotation parity work recorded under [0.2.0], which landed
+> between the tag and the upload.
 
 ### Changed — project, distribution, and import names (breaking)
 

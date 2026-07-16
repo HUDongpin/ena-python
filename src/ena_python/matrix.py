@@ -1,12 +1,42 @@
 from __future__ import annotations
 
 from collections.abc import Sequence
+from functools import lru_cache
 from math import isinf
 
 import numpy as np
 import pandas as pd
 
 from ena_python.exceptions import ValidationError
+
+
+@lru_cache(maxsize=128)
+def _ut_indices(n_codes: int) -> tuple[np.ndarray, np.ndarray]:
+    """Cached column indices for the upper-triangle pair order.
+
+    `(left, right)` such that `matrix[:, left] * matrix[:, right]` yields the code-pair
+    products in rENA's order. Cached because the hot paths ask for the same handful of
+    code counts over and over, and rebuilding a list of tuples per row was a large part
+    of the old cost.
+
+    The arrays are returned read-only: they are shared across every caller, so a mutation
+    would corrupt unrelated results.
+    """
+
+    if n_codes < 0:
+        raise ValidationError("n_codes must be non-negative")
+    left = np.fromiter((j for i in range(1, n_codes) for j in range(i)), dtype=np.intp, count=-1)
+    right = np.fromiter((i for i in range(1, n_codes) for _ in range(i)), dtype=np.intp, count=-1)
+    left.flags.writeable = False
+    right.flags.writeable = False
+    return left, right
+
+
+def _batch_to_ut(matrix: np.ndarray) -> np.ndarray:
+    """Vectorized `vector_to_ut` over every row at once: (n, codes) -> (n, pairs)."""
+
+    left, right = _ut_indices(matrix.shape[1])
+    return matrix[:, left] * matrix[:, right]
 
 
 def adjacency_pairs(n_codes: int) -> list[tuple[int, int]]:
@@ -16,9 +46,8 @@ def adjacency_pairs(n_codes: int) -> list[tuple[int, int]]:
     `svector_to_ut` and `vector_to_ut` in `src/ena.cpp`.
     """
 
-    if n_codes < 0:
-        raise ValidationError("n_codes must be non-negative")
-    return [(j, i) for i in range(1, n_codes) for j in range(i)]
+    left, right = _ut_indices(n_codes)
+    return [(int(j), int(i)) for j, i in zip(left, right, strict=True)]
 
 
 def adjacency_names(codes: Sequence[str], sep: str = " & ") -> list[str]:
@@ -62,10 +91,8 @@ def vector_to_ut(vector: Sequence[float] | np.ndarray) -> np.ndarray:
     """Convert one code vector to rENA's upper-triangle co-occurrence vector."""
 
     arr = np.asarray(vector, dtype=float).reshape(-1)
-    result = np.empty(len(adjacency_pairs(arr.size)), dtype=float)
-    for pos, (j, i) in enumerate(adjacency_pairs(arr.size)):
-        result[pos] = arr[j] * arr[i]
-    return result
+    left, right = _ut_indices(arr.size)
+    return arr[left] * arr[right]
 
 
 def rows_to_co_occurrences(
@@ -87,10 +114,7 @@ def rows_to_co_occurrences(
     if matrix.ndim != 2:
         raise ValidationError("rows must be a 2D matrix or DataFrame")
 
-    pairs = adjacency_pairs(matrix.shape[1])
-    out = np.empty((matrix.shape[0], len(pairs)), dtype=float)
-    for pos, (j, i) in enumerate(pairs):
-        out[:, pos] = matrix[:, j] * matrix[:, i]
+    out = _batch_to_ut(matrix)
     if binary:
         out = (out > 0).astype(float)
 
@@ -131,41 +155,57 @@ def ref_window_matrix(
         raise ValidationError("rows must be a 2D matrix or DataFrame")
 
     n_rows, n_codes = matrix.shape
-    pairs = adjacency_pairs(n_codes)
-    out = np.zeros((n_rows, len(pairs)), dtype=float)
     back = _coerce_window(window_size_back)
     forward = _coerce_window(window_size_forward)
 
-    for row in range(n_rows):
+    if n_rows == 0:
+        out = np.zeros((0, len(_ut_indices(n_codes)[0])), dtype=float)
+    else:
+        # Every quantity rENA needs per row -- the window, its head, its tail -- is the
+        # sum of a *contiguous* run of rows. Prefix sums turn each of those into one
+        # subtraction, `prefix[stop] - prefix[start]`, so the whole thing becomes array
+        # arithmetic and the per-row Python loop disappears.
+        #
+        # Exactness: code columns are 0/1, so these sums are small integers held exactly
+        # in float64 and `prefix[stop] - prefix[start]` equals a fresh sum bit-for-bit.
+        # tests/test_matrix.py pins the kernel against rENA's compiled ref_window_df.
+        prefix = np.zeros((n_rows + 1, n_codes), dtype=float)
+        np.cumsum(matrix, axis=0, out=prefix[1:])
+
+        rows_idx = np.arange(n_rows, dtype=np.intp)
         if isinf(back):
-            earliest = 0
+            earliest = np.zeros(n_rows, dtype=np.intp)
         elif back == 0:
-            earliest = row
+            earliest = rows_idx.copy()
         else:
-            earliest = max(0, row - (int(back) - 1))
+            earliest = np.maximum(0, rows_idx - (int(back) - 1))
 
-        last = n_rows - 1 if isinf(forward) else min(n_rows - 1, row + int(forward))
-        current_window = matrix[earliest : last + 1, :]
-        summed = current_window.sum(axis=0)
-        cooc = vector_to_ut(summed)
+        if isinf(forward):
+            last = np.full(n_rows, n_rows - 1, dtype=np.intp)
+        else:
+            last = np.minimum(n_rows - 1, rows_idx + int(forward))
 
-        n_window_rows = current_window.shape[0]
-        if n_window_rows > 0 and back > 1 and row - 1 >= 0:
-            # rENA clamps an infinite forward window to the row count rather than 0
-            # (ena.cpp:236), which drives `headRows` <= 0 and skips head subtraction
-            # entirely (ena.cpp:274-276). Substituting 0 would subtract a head that
-            # rENA never removes.
-            effective_forward = n_rows if isinf(forward) else forward
-            head_rows = int(n_window_rows - 1 - effective_forward)
-            if head_rows > 0:
-                cooc -= vector_to_ut(current_window[:head_rows, :].sum(axis=0))
+        window_sum = prefix[last + 1] - prefix[earliest]
+        n_window_rows = last - earliest + 1
 
-        if n_window_rows > 0 and forward > 0 and last <= n_rows - 1:
-            tail_rows = last - row
-            if tail_rows > 0:
-                cooc -= vector_to_ut(current_window[-tail_rows:, :].sum(axis=0))
+        # Head subtraction. rENA clamps an infinite forward window to the row count
+        # rather than 0 (ena.cpp:236), which drives `headRows` <= 0 and skips the
+        # subtraction entirely (ena.cpp:274-276); substituting 0 would remove a head
+        # rENA keeps.
+        effective_forward = float(n_rows) if isinf(forward) else forward
+        head_rows = (n_window_rows - 1 - effective_forward).astype(np.intp)
+        head_active = (n_window_rows > 0) & (back > 1) & (rows_idx >= 1) & (head_rows > 0)
+        # Zeroing the inactive rows makes their slice empty, so the sum is 0 and the
+        # subtraction below is a no-op -- no branch needed.
+        head_rows = np.where(head_active, head_rows, 0)
+        head_sum = prefix[earliest + head_rows] - prefix[earliest]
 
-        out[row, :] = cooc
+        tail_rows = last - rows_idx
+        tail_active = (n_window_rows > 0) & (forward > 0) & (last <= n_rows - 1) & (tail_rows > 0)
+        tail_rows = np.where(tail_active, tail_rows, 0)
+        tail_sum = prefix[last + 1] - prefix[last + 1 - tail_rows]
+
+        out = _batch_to_ut(window_sum) - _batch_to_ut(head_sum) - _batch_to_ut(tail_sum)
 
     if binary:
         out = (out > 0).astype(float)

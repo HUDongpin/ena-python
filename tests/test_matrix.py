@@ -2,7 +2,9 @@ from __future__ import annotations
 
 import numpy as np
 import pandas as pd
+import pytest
 
+from ena_python import accumulate
 from ena_python.matrix import (
     adjacency_names,
     connection_matrix,
@@ -81,3 +83,42 @@ def test_connection_matrix() -> None:
     assert got.loc["A", "C"] == 2
     assert got.loc["B", "C"] == 3
     assert got.loc["C", "B"] == 3
+
+
+def test_window_matrix_uses_cached_pair_indices() -> None:
+    """The upper-triangle indices are cached and shared, so they must be read-only.
+
+    A caller mutating them would silently corrupt every later result for that code count.
+    """
+
+    from ena_python.matrix import _ut_indices
+
+    left, right = _ut_indices(4)
+    assert not left.flags.writeable and not right.flags.writeable
+    assert _ut_indices(4)[0] is left, "indices should be cached, not rebuilt"
+
+    with pytest.raises(ValueError):
+        left[0] = 99
+
+
+def test_accumulation_rows_stay_aligned_with_a_duplicate_index() -> None:
+    """Co-occurrences must land on the row they came from, even if index labels repeat.
+
+    The previous implementation built one frame per conversation and stitched them with
+    `pd.concat(pieces).sort_index()`. That orders rows group-by-group, and when index
+    labels tie the sort cannot restore the original row order -- so a co-occurrence was
+    attributed to the wrong row. Here only row 2 has A=1 and B=1, yet the old code put
+    the 1 on row 1 (which is all zeros, and in a different conversation).
+    """
+
+    df = pd.DataFrame(
+        {"conv": ["a", "b", "a"], "A": [0.0, 0.0, 1.0], "B": [0.0, 0.0, 1.0]},
+        index=[0, 0, 0],
+    )
+    got = accumulate(df, units=["conv"], conversation=["conv"], codes=["A", "B"])
+
+    # Row-level counts are what the alignment shows up in.
+    per_row = got.row_connection_counts["A & B"].tolist()
+    assert per_row == [0.0, 0.0, 1.0], (
+        f"co-occurrence landed on the wrong row: {per_row}; only row 2 has A=1 and B=1"
+    )

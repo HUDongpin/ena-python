@@ -125,9 +125,36 @@ def _prepare_accumulation_frame(
 
 
 def _merge_columns(df: pd.DataFrame, cols: Sequence[str], sep: str = "::") -> pd.Series:
+    """Join key columns into rENA-style `a::b` unit/conversation labels.
+
+    Vectorized deliberately. The obvious `.agg(sep.join, axis=1)` walks the frame row by
+    row in Python and, on a realistic dataset (rENA's RS.data: 3824 rows, 87 small
+    conversations), cost ~73% of the whole accumulation -- far more than the
+    moving-stanza window it is usually blamed on. `Series.str.cat` does the same
+    concatenation in one pass.
+
+    Missing keys become the literal "nan", which is what `.astype(str)` + `sep.join`
+    produced under pandas 2. Pandas 3 changed `.astype(str)` to leave NaN as NaN rather
+    than stringifying it, which made the old row-wise join raise
+    `TypeError: sequence item 0: expected str instance, float found` -- a latent
+    incompatibility no test covered, because none used a NaN key. Filling explicitly
+    keeps one behaviour across both.
+
+    A NaN unit or conversation key is still questionable input; it survives here only to
+    avoid changing labels for anyone already relying on it. See
+    docs/porting-notes for the wider NaN policy question.
+    """
+
     if not cols:
         raise ValidationError("Cannot merge zero columns")
-    return df.loc[:, list(cols)].astype(str).agg(sep.join, axis=1)
+    frame = df.loc[:, list(cols)].astype(str).fillna("nan")
+    first = frame.iloc[:, 0]
+    if frame.shape[1] == 1:
+        # `str.cat` with no `others` would concatenate the column into a single string.
+        return first.rename(None)
+    # Pass the remaining columns as a frame rather than a list of Series: same result,
+    # and it is the shape pandas-stubs actually declares.
+    return first.str.cat(frame.iloc[:, 1:], sep=sep).rename(None)
 
 
 def _canonical_model(model: str) -> ModelType:
@@ -211,21 +238,32 @@ def _moving_stanza_windows(
     window_size_forward: int | float | str,
     binary: bool,
 ) -> pd.DataFrame:
-    pieces: list[pd.DataFrame] = []
     adj_names = adjacency_names(code_cols)
-    for _, group in df.groupby(conversation_cols, sort=False, dropna=False):
-        cooc = ref_window_matrix(
-            group[code_cols],
+    if df.empty:
+        return pd.DataFrame(columns=adj_names, index=df.index)
+
+    # Slice the codes once and hand each conversation a plain ndarray. Building a
+    # DataFrame per conversation (and concatenating them afterwards) cost more than the
+    # windowing itself on data with many short conversations -- rENA's RS.data has 87 --
+    # because every group paid for a fresh Index and block manager.
+    codes_matrix = df.loc[:, code_cols].to_numpy(dtype=float)
+    out = np.empty((len(df), len(adj_names)), dtype=float)
+
+    grouped = df.groupby(conversation_cols, sort=False, dropna=False)
+    for positions in grouped.indices.values():
+        # `indices` gives positions in original row order, which is what the moving
+        # stanza window depends on -- it is order-sensitive by definition.
+        block = ref_window_matrix(
+            codes_matrix[positions],
             window_size_back=window_size_back,
             window_size_forward=window_size_forward,
             binary=binary,
-            columns=code_cols,
         )
-        assert isinstance(cooc, pd.DataFrame)
-        pieces.append(cooc)
-    if not pieces:
-        return pd.DataFrame(columns=adj_names, index=df.index)
-    return pd.concat(pieces).sort_index()
+        out[positions] = block
+
+    # Writing at original positions and then sorting reproduces the previous
+    # `pd.concat(pieces).sort_index()` exactly: same rows, same index labels, same sort.
+    return pd.DataFrame(out, index=df.index, columns=adj_names).sort_index()
 
 
 def _metadata_for_units(

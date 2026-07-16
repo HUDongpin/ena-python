@@ -31,19 +31,41 @@ It times accumulation *and* modeling, taking `--repeats` samples (default 5) aft
 Baseline on `RS.data` (3824 rows, 48 units, 6 codes → 15 code pairs, `dimensions=2`),
 median of 5 samples after 1 warmup:
 
-| Stage | Median | Range |
-|---|---:|---|
-| `accumulate` | 0.0714 s | 0.0696 – 0.0896 s |
-| `make_set` | 0.0017 s | 0.0015 – 0.0018 s |
-| **total** | **0.0731 s** | |
+| Stage | Before vectorizing | Now | |
+|---|---:|---:|---:|
+| `accumulate` | 0.0714 s | **0.0071 s** | 10.1x |
+| `make_set` | 0.0017 s | 0.0016 s | — |
+| **total** | **0.0731 s** | **0.0086 s** | **8.5x** |
 
 Recorded on: Apple arm64, macOS 24.6, Python 3.14.6, numpy 2.5.1, pandas 3.0.3.
-Numbers without that context are not comparable, which is why the earlier entry here
-(one unwarmed sample, six decimal places, no hardware noted) is gone.
+Numbers without that context are not comparable.
 
-Accumulation dominates by ~40x, as expected: it is a Python-level loop over
-rows × code pairs, while `make_set` works on the accumulated 48 × 15 matrix and barely
-notices the row count.
+## What the vectorization actually bought
+
+The plan below predicted the win would come from the moving-stanza window. Profiling
+said otherwise, and it is worth recording why.
+
+Vectorizing the window kernel (prefix sums instead of a per-row Python loop) made that
+kernel **24–63x faster** in isolation — but only **1.26x** end-to-end. `cProfile` showed
+the real cost was elsewhere:
+
+| Component | Share of accumulation, before |
+|---|---:|
+| `_merge_columns` (building `a::b` unit keys) | **73%** |
+| moving-stanza window | 23% |
+
+`_merge_columns` used `.agg(sep.join, axis=1)`, a row-by-row pandas apply. `Series.str.cat`
+does it in one pass. That single change was worth **2.8x** on its own — more than the
+kernel the docs had pointed at.
+
+The remaining cost was per-conversation DataFrame construction: `RS.data` has 87 short
+conversations, and each paid for a fresh Index and block manager before being
+`concat`-ed back together. Slicing the codes once into an ndarray and writing results at
+their original row positions removed that, taking accumulation from 0.0204 s to 0.0071 s.
+
+The lesson is the ordinary one: the hot path was not where the design doc assumed, and
+one profile run settled it. Datasets with *few, long* conversations will see the kernel
+speedup dominate instead; `RS.data` is the opposite shape.
 
 ## Regression guards
 
@@ -74,11 +96,18 @@ Expected hot paths:
 
 ## Acceleration plan
 
-1. Vectorize obvious Pandas loops.
-2. Add a Numba implementation of `ref_window_matrix` behind the same API.
-3. Add Polars support for read/groupby-heavy workflows.
-4. Consider sparse adjacency representations for many codes.
-5. Cache schema parsing and adjacency pair indices for web services.
+1. ~~Vectorize obvious Pandas loops.~~ **Done** — see above. `vector_to_ut` /
+   `rows_to_co_occurrences` use precomputed upper-triangle index arrays,
+   `ref_window_matrix` uses prefix sums, `_merge_columns` uses `str.cat`, and the
+   per-conversation loop no longer builds a DataFrame per group.
+2. ~~Cache adjacency pair indices.~~ **Done** — `_ut_indices` is `lru_cache`d and returns
+   read-only arrays.
+3. Add a Numba implementation of `ref_window_matrix` behind the same API. Lower priority
+   now: the kernel is no longer the bottleneck at realistic conversation sizes, and Numba
+   would not survive Pyodide.
+4. Add Polars support for read/groupby-heavy workflows.
+5. Consider sparse adjacency representations for many codes — the adjacency dimension
+   still grows as P²/2.
 
 ## Web-service targets
 

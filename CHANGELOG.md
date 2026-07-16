@@ -25,6 +25,40 @@ name follows the module name for consistency.
 the package exports a top-level function named `ena` — `from ena import ena` reads
 badly. Done now while there is no installed base; it only gets more expensive later.
 
+### Performance
+
+Accumulation is **10x faster** on rENA's `RS.data` (3824 rows / 48 units): 0.0714s →
+0.0071s; end to end 0.0731s → 0.0086s. Output is unchanged — every rENA parity fixture
+still passes, and a differential test compares the new kernel against the previous
+implementation across 2304 configurations.
+
+- `vector_to_ut` / `rows_to_co_occurrences` use cached upper-triangle index arrays
+  instead of rebuilding a list of tuples per call (`vector_to_ut` alone: 15x).
+- `ref_window_matrix` uses prefix sums rather than a per-row Python loop. Every quantity
+  rENA needs — window, head, tail — is a contiguous row-range sum, so each becomes one
+  subtraction (kernel: 24-63x).
+- `_merge_columns` uses `Series.str.cat` instead of `.agg(sep.join, axis=1)`, a row-wise
+  apply. **This was the real bottleneck at 73% of accumulation** — profiling contradicted
+  the design doc, which had pointed at the window kernel (only 23%).
+- The per-conversation loop no longer builds a DataFrame per group; codes are sliced once
+  into an ndarray and results written at their original row positions.
+
+Exactness: for 0/1 code columns — what ENA takes — prefix-sum differences are bit-for-bit
+identical to fresh sums. Non-binary inputs can differ by ~1e-13 (cumulative vs direct
+summation rounding), far below any tolerance here.
+
+### Fixed
+
+- **Co-occurrences could land on the wrong row when the input index had duplicate
+  labels.** The old code built one frame per conversation and stitched them with
+  `pd.concat(pieces).sort_index()`; that orders rows group-by-group, and tied labels
+  leave the sort unable to restore row order. A row with no co-occurrence could be
+  credited with a neighbour's. Found while vectorizing, pinned by
+  `test_accumulation_rows_stay_aligned_with_a_duplicate_index`.
+- **`_merge_columns` raised `TypeError` on pandas 3 when a key column held NaN.** Pandas 3
+  changed `.astype(str)` to leave NaN as NaN rather than stringifying it, so the row-wise
+  `sep.join` hit a float. Missing keys again become the literal "nan", as under pandas 2.
+
 ### Parity
 
 Closes the parity gaps 0.1.0 shipped with: trajectory models, the Conversation

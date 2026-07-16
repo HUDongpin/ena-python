@@ -55,8 +55,9 @@
     <li>Runs a real ENA pipeline: accumulate → model → points, variance, node positions.</li>
   </ol>
   <p>
-    Everything below is computed in this tab. The first load pulls numpy, pandas and
-    scipy as WebAssembly wheels (tens of MB), so it is slow once and cached after.
+    Everything below is computed in this tab. The first load pulls numpy and pandas as
+    WebAssembly wheels, so it is slow once and cached after. ena-python needs nothing
+    beyond those two from 0.2.0 on — dropping SciPy took the stack from ~20 MB to ~7 MB.
   </p>
 </section>
 
@@ -189,15 +190,19 @@ async function main() {
     const pyodide = await loadPyodide();
     log(`pyodide ready — Python ${pyodide.runPython("import sys; sys.version.split()[0]")}`);
 
-    setStatus("Downloading numpy, pandas, scipy…");
-    log("loading micropip + scientific stack (the slow part; cached afterwards)");
-    await pyodide.loadPackage(["micropip", "numpy", "pandas", "scipy"]);
-    log("numpy / pandas / scipy ready");
+    setStatus("Downloading numpy and pandas…");
+    log("loading micropip + numpy + pandas (the slow part; cached afterwards)");
+    await pyodide.loadPackage(["micropip", "numpy", "pandas"]);
+    log("numpy / pandas ready");
 
     setStatus("Installing ena-python from PyPI…");
     const micropip = pyodide.pyimport("micropip");
+    // Only numpy and pandas are loaded above; micropip resolves anything else the
+    // published version declares. ena-python >= 0.2.0 needs nothing further.
     await micropip.install("ena-python");
-    log("ena-python installed (pure-python wheel, ~147 KB)");
+    const extra = pyodide.runPython(
+      "import sys; 'scipy' if 'scipy' in sys.modules or __import__('importlib.util', fromlist=['x']).find_spec('scipy') else ''");
+    log(`ena-python installed (pure-python wheel, ~147 KB)${extra ? ` — plus ${extra}, which this version still requires` : " — no further dependencies"}`);
 
     setStatus("Running ENA…");
     const result = JSON.parse(pyodide.runPython(PYTHON));

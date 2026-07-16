@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "ena-python"
-version = "0.1.0"
+version = "0.2.0"
 description = "Python implementation of Epistemic Network Analysis, ported from the R package rENA."
 readme = "README.md"
 requires-python = ">=3.10"
@@ -29,7 +29,6 @@ classifiers = [
 dependencies = [
   "numpy>=1.26",
   "pandas>=2.1",
-  "scipy>=1.11",
 ]
 
 [project.scripts]
@@ -120,7 +119,7 @@ no_implicit_optional = true
 check_untyped_defs = true
 
 [[tool.mypy.overrides]]
-module = ["plotly", "plotly.*", "scipy", "scipy.*"]
+module = ["plotly", "plotly.*"]
 ignore_missing_imports = true
 
 [tool.coverage.run]

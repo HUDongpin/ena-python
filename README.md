@@ -9,7 +9,7 @@
 
 > Formerly **pyENA**. Renamed because an unrelated package already owns `pyena` on PyPI — including the `pyena` module name — so keeping it would have collided for anyone who installed both.
 
-It is a standalone library: `import ena_python` needs only NumPy, pandas, and SciPy. No R, no Node, no server, and no network access. That keeps it usable in a notebook, in a script, or in browser Python — see the [**runnable Pyodide demo**](examples/pyodide/), which installs ena-python from PyPI and runs a full analysis in a browser tab.
+It is a standalone library: `import ena_python` needs only **NumPy and pandas**. No SciPy, no R, no Node, no server, and no network access. That keeps it usable in a notebook, in a script, or in browser Python — see the [**runnable Pyodide demo**](examples/pyodide/), which installs ena-python from PyPI and runs a full analysis in a browser tab.
 
 > **Status: early release (0.1.0).** The core pipeline — accumulation, the moving-stanza window, normalization, centering, SVD projection, node positioning, and mean rotation — is checked numerically against real rENA 0.3.1. Other parts are not; see [Parity with rENA](#parity-with-rena) for exactly which. The API may still change.
 
@@ -116,20 +116,20 @@ Metadata must be constant within a unit. A metadata column that varies inside a 
 ## In the browser
 
 ena-python runs under [Pyodide](https://pyodide.org/) with no server and no build step —
-the wheel is pure Python (147 KB) and its only dependencies (numpy, pandas, scipy) all
-ship as Pyodide packages.
+the wheel is pure Python (147 KB) and its only dependencies (numpy, pandas) both ship
+as Pyodide packages.
 
 ```js
 const pyodide = await loadPyodide();
-await pyodide.loadPackage(["micropip", "numpy", "pandas", "scipy"]);
+await pyodide.loadPackage(["micropip", "numpy", "pandas"]);
 await pyodide.pyimport("micropip").install("ena-python");
 pyodide.runPython(`from ena_python import ena; ...`);
 ```
 
 [`examples/pyodide/`](examples/pyodide/) is a complete working page that does this and
 plots the result. On a 2026 laptop the analysis takes ~0.02 s; the ~18 s cold start is
-almost entirely the browser downloading numpy/pandas/scipy as WebAssembly, which it then
-caches.
+almost entirely the browser downloading numpy and pandas as WebAssembly, which it then
+caches — about 7 MB, down from 20 MB before SciPy was dropped.
 
 ## Plotting and serving
 

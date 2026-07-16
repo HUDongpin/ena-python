@@ -3,27 +3,24 @@
 All notable changes to ena-python (formerly pyENA) are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versioning is [SemVer](https://semver.org/).
 
-## [Unreleased]
+## [0.2.0] — 2026-07-16
 
-### Changed — project, distribution, and import names (breaking)
+Everything verified since 0.1.0. **Upgrade if you are on 0.1.0**: it carries three bugs
+fixed here, and its accumulation is 10x slower.
 
-The project, the GitHub repository, and the PyPI distribution are now **ena-python**;
-the module is **`ena_python`**, and the CLI command is **`ena-python`**. It was pyENA.
+### Removed
 
-```python
-pip install ena-python
-import ena_python
-```
+- **SciPy is no longer a dependency.** ena-python needs only NumPy and pandas. Exactly
+  three SciPy calls existed (`norm.ppf`, `pearsonr`, `spearmanr`), all in
+  `ena_python.stats`; `statistics.NormalDist().inv_cdf` and `numpy.corrcoef` (over
+  `Series.rank()` for Spearman) give the same answers to ~1e-15 — machine epsilon, six
+  orders of magnitude inside the 1e-9 tolerance the rENA parity fixtures assert. Those
+  fixtures still pass unchanged. Correlations keep working, so nothing moved behind an
+  extra and no caller breaks.
 
-The rename was forced by an unrelated package that already owns `pyena` on PyPI — and
-that installs a top-level module named `pyena` as well. Shipping our own `pyena` module would have
-collided with it silently: two Python ENA ports are exactly the pair someone would
-install together to compare, and whichever landed second would win. The distribution
-name follows the module name for consistency.
-
-`import ena_python` rather than `import ena`, despite `ena` being unclaimed, because
-the package exports a top-level function named `ena` — `from ena import ena` reads
-badly. Done now while there is no installed base; it only gets more expensive later.
+  It removes 13.2 MB of a 20.4 MB scientific stack under Pyodide — 65% of a browser
+  page's download, for functions it may never call — and takes a clean install from
+  219 MB to 120 MB.
 
 ### Performance
 
@@ -64,8 +61,6 @@ summation rounding), far below any tolerance here.
 Closes the parity gaps 0.1.0 shipped with: trajectory models, the Conversation
 window, and the four advanced rotations are now pinned to real compiled rENA 0.3.1
 instead of being smoke-tested only.
-
-### Fixed
 
 - **Trajectory points lost the conversation column.** rENA binds the trajectory frame
   to points for Trajectory models and the metadata frame otherwise
@@ -114,11 +109,38 @@ instead of being smoke-tested only.
 
 ## [0.1.0] — 2026-07-15
 
-First public release. Addresses the findings of the 2026-07-15 technical review of
-0.0.1 (internal alpha). **Numeric output changes**: `variance` and `eigenvalues` were
-wrong on data of rank > `dimensions`, so results from 0.0.1 should be regenerated.
+First public release.
+
+> **Note on this version number.** The wheel uploaded to PyPI as `ena-python` 0.1.0
+> includes the rename below. The git tag `v0.1.0` predates it and still builds the
+> `pyena` module, because the tag was cut before the rename. Nothing depends on the tag;
+> the PyPI artifact is authoritative for what 0.1.0 means.
+
+### Changed — project, distribution, and import names (breaking)
+
+The project, the GitHub repository, and the PyPI distribution are now **ena-python**;
+the module is **`ena_python`**, and the CLI command is **`ena-python`**. It was pyENA.
+
+```python
+pip install ena-python
+import ena_python
+```
+
+The rename was forced by an unrelated package that already owns `pyena` on PyPI — and
+that installs a top-level module named `pyena` as well. Shipping our own `pyena` module would have
+collided with it silently: two Python ENA ports are exactly the pair someone would
+install together to compare, and whichever landed second would win. The distribution
+name follows the module name for consistency.
+
+`import ena_python` rather than `import ena`, despite `ena` being unclaimed, because
+the package exports a top-level function named `ena` — `from ena import ena` reads
+badly. Done now while there is no installed base; it only gets more expensive later.
 
 ### Fixed
+
+Addresses the findings of the 2026-07-15 technical review of 0.0.1 (internal alpha).
+**Numeric output changes**: `variance` and `eigenvalues` were wrong on data of rank >
+`dimensions`, so results from 0.0.1 should be regenerated.
 
 - **`variance` was normalized over only the retained dimensions** instead of the total
   across all of them, overstating every retained dimension whenever
@@ -194,4 +216,5 @@ wrong on data of rank > `dimensions`, so results from 0.0.1 should be regenerate
 - Released to PyPI as `ena-python` (see Unreleased): the `pyena` name belongs to
   an unrelated project, so this release went out under the new name.
 
+[0.2.0]: https://github.com/HUDongpin/ena-python/releases/tag/v0.2.0
 [0.1.0]: https://github.com/HUDongpin/ena-python/releases/tag/v0.1.0

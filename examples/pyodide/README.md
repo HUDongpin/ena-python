@@ -23,14 +23,19 @@ WebAssembly runtime, and browsers block those requests on `file://`.
 | Step | Elapsed |
 |---|---:|
 | Pyodide runtime ready | ~3 s |
-| numpy + pandas + scipy loaded | ~9 s |
+| numpy + pandas loaded | ~3.5 s |
 | `micropip.install("ena-python")` | ~0.7 s |
 | **`ena()` on 4 units × 3 codes** | **~0.02 s** |
-| Total, cold | ~18 s |
+| Total, cold | ~12 s |
 
-The analysis itself is milliseconds. Essentially all of the wait is downloading the
-scientific stack as WebAssembly wheels — tens of megabytes, fetched once and then cached
-by the browser. ena-python's own wheel is **147 KB**.
+The analysis itself is milliseconds. Essentially all of the wait is downloading numpy and
+pandas as WebAssembly wheels — about 7 MB, fetched once and then cached by the browser.
+ena-python's own wheel is **147 KB**.
+
+SciPy used to make that 20 MB. It was dropped in 0.2.0: only three calls needed it
+(`norm.ppf`, `pearsonr`, `spearmanr`), and the standard library and NumPy give the same
+answers to ~1e-15. If `micropip` still logs "plus scipy", it resolved an older published
+version that declares it.
 
 ## Why this works at all
 
@@ -38,9 +43,9 @@ Three properties, each verifiable rather than aspirational:
 
 1. **The wheel is pure Python** (`py3-none-any`, no compiled extensions), so `micropip`
    can install it directly from PyPI with no build step.
-2. **The dependencies are numpy, pandas and scipy** — all three ship as Pyodide
-   packages. Removing the unused `scikit-learn` dependency in 0.1.0 mattered here: it is
-   heavy and would have been dead weight in the browser.
+2. **The dependencies are numpy and pandas** — both ship as Pyodide packages. Trimming
+   dependencies mattered here twice: `scikit-learn` went in 0.1.0 (unused), and SciPy in
+   0.2.0 (13.2 MB of a 20.4 MB stack, for three replaceable calls).
 3. **The core touches nothing a browser forbids** — no subprocess, no filesystem, no
    sockets, no R. The R bridge exists only for generating test fixtures and is never
    imported by `ena_python`.
@@ -89,9 +94,10 @@ rows = pd.read_csv(io.StringIO(csv_text))
 
 ## Notes
 
-- Pinned to Pyodide **v314.0.2**, which ships numpy 2.4.3, pandas 3.0.2 and scipy 1.18.0
-  — all satisfying ena-python's requirements.
+- Pinned to Pyodide **v314.0.2**, which ships numpy 2.4.3 and pandas 3.0.2 — both
+  satisfying ena-python's requirements.
 - `micropip.install("ena-python")` takes whatever is current on PyPI. Pin it
   (`ena-python==0.1.0`) if you need a reproducible page.
-- Loading only `numpy` and `pandas` is not enough: importing `ena_python` currently pulls
-  `scipy` too, via `ena_python.stats`.
+- The page loads only `numpy` and `pandas`, and lets `micropip` resolve whatever the
+  published version declares. That way it works against 0.1.0 (which pulls SciPy) and
+  0.2.0+ (which does not) with no edit.

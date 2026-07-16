@@ -44,7 +44,7 @@ rot <- function(r) as.matrix(r$rotation)
 
 ## 1. `ena.rotate.by.hena.regression` does not deflate the y axis
 
-Tracked as [#1](https://github.com/HUDongpin/ena-python/issues/1).
+Tracked as [#1](https://github.com/HUDongpin/ena-python/issues/1) · reported upstream as [rENA #49](https://gitlab.com/epistemic-analytics/qe-packages/rENA/-/issues/49).
 
 **Severity: high — affects returned coordinates.**
 
@@ -110,7 +110,7 @@ Note that the *subsequent* deflation on line 130 (`defA <- defA - defA %*% v2 %*
 
 ## 2. Regression axes are named after the first edge, not the predictor
 
-Tracked as [#2](https://github.com/HUDongpin/ena-python/issues/2).
+Tracked as [#2](https://github.com/HUDongpin/ena-python/issues/2) · reported upstream as [rENA #50](https://gitlab.com/epistemic-analytics/qe-packages/rENA/-/issues/50).
 
 **Severity: low — cosmetic, but produces duplicate column names.**
 
@@ -142,7 +142,7 @@ all.vars(as.formula("V ~ score"))   # "V" "score"
 
 ## 3. The documented `x_var` form raises an error
 
-Tracked as [#3](https://github.com/HUDongpin/ena-python/issues/3).
+Tracked as [#3](https://github.com/HUDongpin/ena-python/issues/3) · reported upstream as [rENA #51](https://gitlab.com/epistemic-analytics/qe-packages/rENA/-/issues/51).
 
 **Severity: low — documentation/code mismatch.**
 
@@ -170,7 +170,7 @@ ena.rotate.by.hena.regression(set, list(x_var = "V ~ score"))
 
 ## 4. `ena.rotate.by.hena.regression_2` errors cryptically on rank-deficient input
 
-Tracked as [#4](https://github.com/HUDongpin/ena-python/issues/4).
+Tracked as [#4](https://github.com/HUDongpin/ena-python/issues/4) · reported upstream as [rENA #52](https://gitlab.com/epistemic-analytics/qe-packages/rENA/-/issues/52).
 
 **Severity: low — diagnostics.**
 
@@ -192,7 +192,7 @@ With 7+ units and the same 4 codes it succeeds. The underlying situation is legi
 
 ## 5. `ena.rotation.h` emits a `data.table` warning on every call
 
-Tracked as [#5](https://github.com/HUDongpin/ena-python/issues/5).
+Tracked as [#5](https://github.com/HUDongpin/ena-python/issues/5) · reported upstream as [rENA #53](https://gitlab.com/epistemic-analytics/qe-packages/rENA/-/issues/53).
 
 **Severity: trivial — noise.**
 
@@ -212,7 +212,7 @@ The rotation itself is correct — ena-python matches it exactly, including with
 
 ## 6. `ena.correlations(dims = ...)` breaks for any subset that is not `1:n`
 
-Tracked as [#6](https://github.com/HUDongpin/ena-python/issues/6).
+Tracked as [#6](https://github.com/HUDongpin/ena-python/issues/6) · reported upstream as [rENA #54](https://gitlab.com/epistemic-analytics/qe-packages/rENA/-/issues/54).
 
 **Severity: low — the documented parameter only works for its default-shaped values.**
 
@@ -271,8 +271,27 @@ For balance, the following were checked against real compiled rENA 0.3.1 and agr
 
 See [`tests/test_r_oracle_parity.py`](../tests/test_r_oracle_parity.py) and the [README parity table](../README.md#parity-with-rena).
 
-## Reporting upstream
+## Reported upstream
 
-These have not been filed with the rENA maintainers. If you have a GitLab account on
-[epistemic-analytics/qe-packages/rENA](https://gitlab.com/epistemic-analytics/qe-packages/rENA)
-and want to report them, items 1–3 and 6 are the ones worth their time; each snippet above is self-contained.
+All six were filed on the [rENA tracker](https://gitlab.com/epistemic-analytics/qe-packages/rENA/-/issues)
+on 2026-07-16:
+
+| Here | rENA issue |
+|---|---|
+| §1 | [rENA #49](https://gitlab.com/epistemic-analytics/qe-packages/rENA/-/issues/49) |
+| §2 | [rENA #50](https://gitlab.com/epistemic-analytics/qe-packages/rENA/-/issues/50) |
+| §3 | [rENA #51](https://gitlab.com/epistemic-analytics/qe-packages/rENA/-/issues/51) |
+| §4 | [rENA #52](https://gitlab.com/epistemic-analytics/qe-packages/rENA/-/issues/52) |
+| §5 | [rENA #53](https://gitlab.com/epistemic-analytics/qe-packages/rENA/-/issues/53) |
+| §6 | [rENA #54](https://gitlab.com/epistemic-analytics/qe-packages/rENA/-/issues/54) |
+
+Each upstream report opens with the ena-python porting context, links back to this
+document and to the matching [ena-python issue](https://github.com/HUDongpin/ena-python/issues?q=label%3Aupstream-rena),
+and pins its source references to rENA `main` @ `a09a4b20` — verified byte-identical to
+the released 0.3.1 these were found against, so the findings apply to their current tree
+and not only to the CRAN build.
+
+Finding 1 also cross-references
+[rENA #48](https://gitlab.com/epistemic-analytics/qe-packages/rENA/-/issues/48), an
+earlier report from this project about the `prcomp` completion columns in the same
+rotation family: a distinct mechanism, but the fixes may want to land together.

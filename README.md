@@ -198,7 +198,7 @@ Porting turned up six places where rENA 0.3.1 behaves differently from what its 
 | [5](docs/rena-upstream-issues.md#5-enarotationh-emits-a-datatable-warning-on-every-call) | `ena.rotation.h` warns on every call | Trivial | n/a |
 | [6](docs/rena-upstream-issues.md#6-enacorrelationsdims-breaks-for-any-subset-that-is-not-1n) | `ena.correlations(dims=)` errors for any subset that is not `1:n` | Low | Takes dimension names; any subset works |
 
-These are **rENA issues, not ena-python bugs**, reported as observations rather than accusations — they may be fixed upstream or intended. Only #1 changes ena-python's output relative to rENA:
+These are **rENA issues, not ena-python bugs**, reported as observations rather than accusations — they may be fixed upstream or intended. All six were filed on the rENA tracker on 2026-07-16 as [rENA #49–#54](https://gitlab.com/epistemic-analytics/qe-packages/rENA/-/issues/?sort=created_date&state=opened&search=ena-python). Only #1 changes ena-python's output relative to rENA:
 
 > Given both `x_var` and `y_var`, `rotate_by_regression` returns a **different y axis than rENA**, deliberately. rENA means to regress y on the x-deflated points (`ena.rotate.by.regression.R` sets `V <- defA` first), but that never takes effect: `with.ena.matrix` rebinds `V` to the raw points unless passed a `V =` argument, and a refactor dropped it. Its sibling `ena.rotate.by.generalized` deflates correctly on the same data. ena-python deflates, so its axes are orthogonal and its x axis matches rENA exactly. If rENA fixes this, ena-python will match it column-for-column.
 
